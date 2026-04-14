@@ -17,10 +17,10 @@ export default function SignInPage() {
       <Animated.View entering={FadeInDown.duration(600).delay(200)} style={styles.formContainer}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <Text style={styles.logoText}>FS</Text>
+            <Text style={styles.logoText}>NP</Text>
           </View>
           <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Sign in to continue to Dream Studio</Text>
+          <Text style={styles.subtitle}>Sign in to continue to NeuroPay</Text>
         </View>
 
         <View style={styles.inputGroup}>
@@ -34,6 +34,7 @@ export default function SignInPage() {
               autoCapitalize="none"
               onFocus={() => setFocused("email")}
               onBlur={() => setFocused(null)}
+              selectionColor="#14ed9e"
             />
           </View>
           <View style={[styles.inputWrapper, focused === "password" && styles.inputWrapperFocused]}>
@@ -45,6 +46,7 @@ export default function SignInPage() {
               secureTextEntry
               onFocus={() => setFocused("password")}
               onBlur={() => setFocused(null)}
+              selectionColor="#14ed9e"
             />
           </View>
         </View>
@@ -80,19 +82,29 @@ const styles = StyleSheet.create({
   formContainer: { width: "100%" },
   header: { alignItems: "center", marginBottom: 32 },
   logoContainer: { width: 64, height: 64, borderRadius: 16, backgroundColor: "#14ed9e", alignItems: "center", justifyContent: "center", marginBottom: 24, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 20, elevation: 10 },
-  logoText: { color: "#0d0e12", fontSize: 24, fontWeight: "bold" },
-  title: { fontSize: 28, fontWeight: "bold", color: "#fcfcfc" },
-  subtitle: { fontSize: 14, color: "#7e828d", marginTop: 8 },
+  logoText: { color: "#0d0e12", fontSize: 24, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
+  title: { fontSize: 28, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_700Bold" },
+  subtitle: { fontSize: 14, color: "#7e828d", marginTop: 8, fontFamily: "Manrope_400Regular" },
   inputGroup: { gap: 16 },
   inputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#23242f", borderRadius: 12, borderWidth: 1, borderColor: "#24252e", paddingHorizontal: 16, height: 56 },
-  inputWrapperFocused: { borderColor: "#14ed9e", shadowColor: "#14ed9e", shadowOpacity: 0.2, shadowRadius: 8, elevation: 4 },
+  inputWrapperFocused: { borderColor: "#14ed9e", shadowColor: "#14ed9e", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 },
   inputIcon: { marginRight: 12 },
-  input: { flex: 1, color: "#fcfcfc", fontSize: 14 },
+  input: { 
+    flex: 1, 
+    color: "#fcfcfc", 
+    fontSize: 15,
+    // @ts-ignore
+    outlineWidth: 0,
+    // @ts-ignore
+    outlineStyle: 'none',
+    borderWidth: 0,
+    fontFamily: "Manrope_400Regular"
+  },
   forgotWrapper: { alignItems: "flex-end", marginTop: 12, marginBottom: 24 },
-  forgotText: { color: "#14ed9e", fontSize: 12, fontWeight: "600" },
+  forgotText: { color: "#14ed9e", fontSize: 12, fontWeight: "600", fontFamily: "Manrope_600SemiBold" },
   submitButton: { backgroundColor: "#14ed9e", height: 56, borderRadius: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 10 },
-  submitText: { color: "#0d0e12", fontSize: 16, fontWeight: "600" },
+  submitText: { color: "#0d0e12", fontSize: 16, fontWeight: "600", fontFamily: "Manrope_700Bold" },
   footer: { flexDirection: "row", justifyContent: "center", marginTop: 32 },
-  footerText: { color: "#7e828d", fontSize: 14 },
-  linkText: { color: "#14ed9e", fontSize: 14, fontWeight: "600" }
+  footerText: { color: "#7e828d", fontSize: 14, fontFamily: "Manrope_400Regular" },
+  linkText: { color: "#14ed9e", fontSize: 14, fontWeight: "600", fontFamily: "Manrope_600SemiBold" }
 });

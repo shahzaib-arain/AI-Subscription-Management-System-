@@ -75,21 +75,21 @@ const styles = StyleSheet.create({
   scrollContent: { paddingHorizontal: 20, paddingTop: 64, paddingBottom: 100 },
   avatarContainer: { alignItems: "center", marginBottom: 24 },
   avatarBubble: { width: 80, height: 80, borderRadius: 40, backgroundColor: "#14ed9e", alignItems: "center", justifyContent: "center", marginBottom: 16, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 15 },
-  avatarText: { color: "#0d0e12", fontSize: 28, fontWeight: "bold" },
-  name: { color: "#fcfcfc", fontSize: 20, fontWeight: "bold" },
-  email: { color: "#7e828d", fontSize: 12, marginTop: 4 },
+  avatarText: { color: "#0d0e12", fontSize: 28, fontWeight: "bold", fontFamily: "Manrope_800ExtraBold" },
+  name: { color: "#fcfcfc", fontSize: 20, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
+  email: { color: "#7e828d", fontSize: 12, marginTop: 4, fontFamily: "Manrope_400Regular" },
   
   statsCard: { backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 16, padding: 16, flexDirection: "row", justifyContent: "space-between", marginBottom: 24 },
   statCol: { alignItems: "center", flex: 1 },
-  statValue: { color: "#fcfcfc", fontSize: 24, fontWeight: "bold" },
-  statLabel: { color: "#7e828d", fontSize: 10, marginTop: 4 },
+  statValue: { color: "#fcfcfc", fontSize: 24, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
+  statLabel: { color: "#7e828d", fontSize: 10, marginTop: 4, fontFamily: "Manrope_500Medium" },
   
   menuCard: { backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 16, marginBottom: 24 },
   menuItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 16 },
   borderBottom: { borderBottomWidth: 1, borderBottomColor: "#24252e" },
   menuLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  menuLabel: { color: "#fcfcfc", fontSize: 14, fontWeight: "500" },
+  menuLabel: { color: "#fcfcfc", fontSize: 14, fontWeight: "500", fontFamily: "Manrope_500Medium" },
   
   logoutButton: { backgroundColor: "rgba(245, 34, 34, 0.1)", borderRadius: 16, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  logoutText: { color: "#f52222", fontSize: 14, fontWeight: "600" }
+  logoutText: { color: "#f52222", fontSize: 14, fontWeight: "600", fontFamily: "Manrope_700Bold" }
 });

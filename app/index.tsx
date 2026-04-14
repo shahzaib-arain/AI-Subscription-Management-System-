@@ -126,8 +126,8 @@ export default function SplashPage() {
             />
           </Animated.View>
           <Animated.View style={{ opacity: titleOpacity }}>
-             <Text style={styles.title}>Dream Studio</Text>
-             <Text style={styles.subtitle}>Your financial future, designed.</Text>
+             <Text style={styles.title}>NeuroPay</Text>
+             <Text style={styles.subtitle}>Intelligence in every transaction.</Text>
           </Animated.View>
         </Animated.View>
       ) : (
@@ -192,7 +192,7 @@ export default function SplashPage() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#06070a" },
+  container: { flex: 1, backgroundColor: "#0d0e12" },
   blob: {
     position: "absolute",
     width: 350,
@@ -215,12 +215,12 @@ const styles = StyleSheet.create({
     width: "100%", 
     height: "100%", 
   },
-  title: { fontSize: 44, fontWeight: "900", color: "#fcfcfc", textAlign: "center", letterSpacing: -1.5 },
-  subtitle: { fontSize: 18, color: "rgba(255,255,255,0.5)", marginTop: 12, textAlign: "center", fontWeight: "400" },
+  title: { fontSize: 44, fontWeight: "900", color: "#fcfcfc", textAlign: "center", letterSpacing: -1.5, fontFamily: "Manrope_800ExtraBold" },
+  subtitle: { fontSize: 18, color: "rgba(255,255,255,0.5)", marginTop: 12, textAlign: "center", fontWeight: "400", fontFamily: "Manrope_400Regular" },
   onboardingContainer: { flex: 1, paddingHorizontal: 30, paddingTop: 60, paddingBottom: 60 },
   header: { alignItems: "flex-end", marginBottom: 20 },
   skipBtn: { padding: 10, backgroundColor: "rgba(255,255,255,0.05)", borderRadius: 12 },
-  skipText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600" },
+  skipText: { color: "rgba(255,255,255,0.6)", fontSize: 15, fontWeight: "600", fontFamily: "Manrope_600SemiBold" },
   carouselContainer: { flex: 1, justifyContent: "center" },
   slideCenter: { alignItems: "center" },
   iconContainer: { 
@@ -241,8 +241,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "rgba(255,255,255,0.15)"
   },
-  slideTitle: { fontSize: 34, fontWeight: "800", color: "#fcfcfc", marginBottom: 20, textAlign: "center", letterSpacing: -0.5 },
-  slideDesc: { fontSize: 18, color: "rgba(255,255,255,0.6)", textAlign: "center", lineHeight: 30, paddingHorizontal: 15 },
+  slideTitle: { fontSize: 34, fontWeight: "800", color: "#fcfcfc", marginBottom: 20, textAlign: "center", letterSpacing: -0.5, fontFamily: "Manrope_800ExtraBold" },
+  slideDesc: { fontSize: 18, color: "rgba(255,255,255,0.6)", textAlign: "center", lineHeight: 30, paddingHorizontal: 15, fontFamily: "Manrope_400Regular" },
   bottomContainer: { 
     flexDirection: "row", 
     alignItems: "center", 
@@ -262,5 +262,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 15,
   },
-  nextButtonText: { color: "#0d0e12", fontSize: 19, fontWeight: "800" }
+  nextButtonText: { color: "#0d0e12", fontSize: 19, fontWeight: "800", fontFamily: "Manrope_800ExtraBold" }
 });

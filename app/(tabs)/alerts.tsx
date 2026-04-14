@@ -71,9 +71,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0d0e12" },
   scrollContent: { paddingHorizontal: 20, paddingTop: 64, paddingBottom: 100 },
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24 },
-  title: { fontSize: 24, fontWeight: "bold", color: "#fcfcfc" },
+  title: { fontSize: 24, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_800ExtraBold" },
   badgeCount: { backgroundColor: "rgba(245, 34, 34, 0.2)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { color: "#f52222", fontSize: 12, fontWeight: "bold" },
+  badgeText: { color: "#f52222", fontSize: 12, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
   list: { gap: 12 },
   card: { backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 16, padding: 16 },
   cardUnread: { borderWidth: 1, borderColor: "rgba(20, 237, 158, 0.2)" },
@@ -81,10 +81,10 @@ const styles = StyleSheet.create({
   flexRow: { flexDirection: "row", alignItems: "flex-start", gap: 12, flex: 1 },
   iconBox: { width: 36, height: 36, borderRadius: 8, alignItems: "center", justifyContent: "center" },
   cardTextCol: { flex: 1, paddingRight: 8 },
-  alertTitle: { color: "#fcfcfc", fontSize: 14, fontWeight: "600", marginBottom: 4 },
-  alertDesc: { color: "#7e828d", fontSize: 12, lineHeight: 18 },
+  alertTitle: { color: "#fcfcfc", fontSize: 14, fontWeight: "600", marginBottom: 4, fontFamily: "Manrope_600SemiBold" },
+  alertDesc: { color: "#7e828d", fontSize: 12, lineHeight: 18, fontFamily: "Manrope_400Regular" },
   cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  timestamp: { color: "#7e828d", fontSize: 10 },
+  timestamp: { color: "#7e828d", fontSize: 10, fontFamily: "Manrope_400Regular" },
   reviewButton: { backgroundColor: "#14ed9e", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-  reviewText: { color: "#0d0e12", fontSize: 11, fontWeight: "bold" }
+  reviewText: { color: "#0d0e12", fontSize: 11, fontWeight: "bold", fontFamily: "Manrope_700Bold" }
 });

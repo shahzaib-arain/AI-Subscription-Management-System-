@@ -11,6 +11,7 @@ export default function TabLayout() {
         tabBarShowLabel: false,
         tabBarActiveTintColor: "#14ed9e",
         tabBarInactiveTintColor: "#7e828d",
+        tabBarLabelStyle: { fontFamily: "Manrope_600SemiBold", fontSize: 11 },
       }}
     >
       <Tabs.Screen

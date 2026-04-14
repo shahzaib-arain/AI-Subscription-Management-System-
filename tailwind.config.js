@@ -19,6 +19,11 @@ module.exports = {
         success: "#14ed9e",
         warning: "#ffd11a",
         destructive: "#f52222"
+      },
+      fontFamily: {
+        manrope: ["Manrope_400Regular"],
+        "manrope-bold": ["Manrope_700Bold"],
+        "manrope-medium": ["Manrope_500Medium"],
       }
     },
   },

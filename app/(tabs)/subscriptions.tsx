@@ -89,29 +89,29 @@ export default function SubscriptionsPage() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0d0e12" },
   scrollContent: { paddingHorizontal: 20, paddingTop: 64, paddingBottom: 100 },
-  title: { fontSize: 24, fontWeight: "bold", color: "#fcfcfc", marginBottom: 20 },
+  title: { fontSize: 24, fontWeight: "bold", color: "#fcfcfc", marginBottom: 20, fontFamily: "Manrope_800ExtraBold" },
   
   searchBox: { flexDirection: "row", alignItems: "center", backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 12, paddingHorizontal: 16, height: 48, marginBottom: 16 },
-  searchInput: { flex: 1, color: "#fcfcfc", marginLeft: 12, fontSize: 14 },
+  searchInput: { flex: 1, color: "#fcfcfc", marginLeft: 12, fontSize: 14, fontFamily: "Manrope_400Regular" },
   
   tabsCol: { marginBottom: 20 },
   tabsRow: { gap: 8 },
   tabButton: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: "rgba(35, 36, 47, 0.6)" },
   tabButtonActive: { backgroundColor: "#14ed9e" },
-  tabText: { color: "#7e828d", fontSize: 12, fontWeight: "500" },
-  tabTextActive: { color: "#0d0e12", fontWeight: "bold" },
+  tabText: { color: "#7e828d", fontSize: 12, fontWeight: "500", fontFamily: "Manrope_500Medium" },
+  tabTextActive: { color: "#0d0e12", fontWeight: "bold", fontFamily: "Manrope_700Bold" },
   
   list: { gap: 12 },
   card: { backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 16, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   cardLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
   logoBox: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
-  subName: { color: "#fcfcfc", fontSize: 14, fontWeight: "600" },
-  subCategory: { color: "#7e828d", fontSize: 12 },
-  subAmount: { color: "#fcfcfc", fontSize: 16, fontWeight: "bold" },
+  subName: { color: "#fcfcfc", fontSize: 14, fontWeight: "600", fontFamily: "Manrope_600SemiBold" },
+  subCategory: { color: "#7e828d", fontSize: 12, fontFamily: "Manrope_400Regular" },
+  subAmount: { color: "#fcfcfc", fontSize: 16, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
   
   badgeFlagged: { backgroundColor: "rgba(245, 34, 34, 0.2)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
-  textFlagged: { color: "#f52222", fontSize: 10, fontWeight: "bold" },
+  textFlagged: { color: "#f52222", fontSize: 10, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
   badgePaused: { backgroundColor: "rgba(255, 209, 26, 0.2)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
-  textPaused: { color: "#ffd11a", fontSize: 10, fontWeight: "bold" }
+  textPaused: { color: "#ffd11a", fontSize: 10, fontWeight: "bold", fontFamily: "Manrope_700Bold" }
 });
