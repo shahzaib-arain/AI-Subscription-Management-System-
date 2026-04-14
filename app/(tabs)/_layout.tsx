@@ -1,35 +1,92 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Tabs } from "expo-router";
+import { Home, CreditCard, Shield, Bell, User } from "lucide-react-native";
+import { View, StyleSheet } from "react-native";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarStyle: styles.tabBar,
+        tabBarShowLabel: false,
+        tabBarActiveTintColor: "#14ed9e",
+        tabBarInactiveTintColor: "#7e828d",
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIcon : styles.inactiveIcon}>
+              <Home size={24} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="subscriptions"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Subscriptions",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIcon : styles.inactiveIcon}>
+              <CreditCard size={24} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="activity"
+        options={{
+          title: "Activity",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIcon : styles.inactiveIcon}>
+              <Shield size={24} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="alerts"
+        options={{
+          title: "Alerts",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIcon : styles.inactiveIcon}>
+              <Bell size={24} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIcon : styles.inactiveIcon}>
+              <User size={24} color={color} />
+            </View>
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: "#15161d",
+    borderTopWidth: 1,
+    borderTopColor: "#24252e",
+    height: 80,
+    elevation: 0,
+    paddingTop: 8,
+  },
+  activeIcon: {
+    padding: 8,
+    borderRadius: 12,
+    backgroundColor: "rgba(20, 237, 158, 0.1)",
+  },
+  inactiveIcon: {
+    padding: 8,
+  }
+});
