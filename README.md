@@ -1,50 +1,75 @@
-# Welcome to your Expo app 👋
+# 🤖 AI-Powered Centralized Subscription Management System for Banking Platforms
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+[![Java Spring Boot](https://img.shields.io/badge/Backend-Spring%20Boot-brightgreen)](https://spring.io/projects/spring-boot)
+[![React](https://img.shields.io/badge/Frontend-React-blue)](https://reactjs.org/)
+[![Python](https://img.shields.io/badge/AI/ML-Python%20%7C%20TensorFlow-yellow)](https://www.tensorflow.org/)
+[![Database](https://img.shields.io/badge/Database-PostgreSQL%20%7C%20MongoDB-orange)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-Academic%20Use-red)](LICENSE)
 
-## Get started
+<p align="center">
+  <i>Modern banking platforms process recurring payments but lack intelligent systems for subscription management.</i><br>
+  <b>This project introduces an AI-powered solution to automatically detect subscription transactions, monitor billing patterns, detect fraud, and give users full control over recurring payments.</b>
+</p>
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## 📌 Table of Contents
 
-2. Start the app
+- [🎯 Problem Statement](#-problem-statement)
+- [✨ Executive Summary](#-executive-summary)
+- [🏗️ System Architecture](#️-system-architecture)
+- [⭐ Key Features](#-key-features)
+- [🛠️ Tech Stack & Tools](#️-tech-stack--tools)
+- [📊 Competitor Analysis](#-competitor-analysis)
+- [📁 Project Structure](#-project-structure)
+- [🚀 Getting Started](#-getting-started)
+- [📈 Future Enhancements](#-future-enhancements)
+- [👨‍💻 Developer](#-developer)
+- [📚 References](#-references)
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🎯 Problem Statement
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Many modern banking platforms primarily focus on processing financial transactions but lack intelligent systems for effective subscription management. As a result, customers face:
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+| Issue | Description |
+|-------|-------------|
+| ❌ **Limited Visibility** | No clear view of all active subscriptions |
+| ❌ **Recurring Charges** | Difficulty identifying recurring vs one-time payments |
+| ❌ **Abnormal Billing** | Inability to detect unexpected price increases |
+| ❌ **Unauthorized Renewals** | Automatic renewals without user awareness |
+| ❌ **Fraud Gaps** | Recurring payment anomalies remain undetected |
 
-## Get a fresh project
+> Existing fraud detection systems focus on unusual transaction locations or spending spikes — **but recurring payment anomalies remain undetected.**
 
-When you're ready, run:
+### ✅ Our Solution
 
-```bash
-npm run reset-project
-```
+Automatically identifies subscription transactions, monitors billing patterns, detects anomalies, and provides users with **full control and transparency** over recurring payments.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## ✨ Executive Summary
 
-To learn more about developing your project with Expo, look at the following resources:
+With the rapid growth of subscription-based digital services (Netflix, Spotify, Amazon, cloud services, etc.), recurring payments have increased significantly. However, most banking apps only provide basic transaction histories — **no intelligent tools** for identifying, monitoring, or managing subscriptions.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+### 🎯 What I Built
 
-## Join the community
+| Component | Description |
+|-----------|-------------|
+| 🔍 **AI-Powered Detection** | Automatically identifies recurring payments from transaction data |
+| 📊 **Centralized Dashboard** | View and manage all subscriptions in one place |
+| 🚨 **Fraud Alerts** | Real-time warnings for sudden price increases or suspicious charges |
+| ⚙️ **User Controls** | Approve, pause, or block subscriptions directly |
+| 📱 **Smart Notifications** | Alerts via app, email, or SMS for upcoming or abnormal charges |
 
-Join our community of developers creating universal apps.
+### 💡 Impact
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- 📈 Increases financial transparency
+- 💰 Reduces wasted spending on unused subscriptions
+- 🛡️ Improves fraud detection for recurring transactions
+- 🧠 Brings AI-driven intelligence into digital banking
+
+---
+
+## 🏗️ System Architecture
