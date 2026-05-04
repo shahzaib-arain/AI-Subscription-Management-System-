@@ -9,7 +9,7 @@ export default function SignUpPage() {
   const [focused, setFocused] = useState<string | null>(null);
 
   const handleSignUp = () => {
-    router.replace("/(tabs)");
+    router.replace("/auth/add-card");
   };
 
   return (

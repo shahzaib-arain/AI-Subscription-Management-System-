@@ -4,11 +4,11 @@ import Animated, { FadeInUp } from "react-native-reanimated";
 import { Shield, Bell, CreditCard, HelpCircle, LogOut, ChevronRight, Settings } from "lucide-react-native";
 
 const menuItems = [
-  { icon: Shield, label: "Security & Privacy", color: "#14ed9e" },
-  { icon: Bell, label: "Notification Preferences", color: "#ffd11a" },
-  { icon: CreditCard, label: "Linked Bank Accounts", color: "#a96df5" },
-  { icon: Settings, label: "AI Detection Settings", color: "#14ed9e" },
-  { icon: HelpCircle, label: "Help & Support", color: "#7e828d" },
+  { icon: Shield, label: "Security & Privacy", color: "#14ed9e", route: null },
+  { icon: Bell, label: "Notification Preferences", color: "#ffd11a", route: null },
+  { icon: CreditCard, label: "Payment Methods", color: "#a96df5", route: "/cards" },
+  { icon: Settings, label: "AI Detection Settings", color: "#14ed9e", route: null },
+  { icon: HelpCircle, label: "Help & Support", color: "#7e828d", route: null },
 ];
 
 export default function ProfilePage() {
@@ -48,6 +48,7 @@ export default function ProfilePage() {
           <TouchableOpacity 
             key={item.label} 
             style={[styles.menuItem, index !== menuItems.length - 1 && styles.borderBottom]}
+            onPress={() => item.route && router.push(item.route as any)}
           >
             <View style={styles.menuLeft}>
               <item.icon size={18} color={item.color} />
