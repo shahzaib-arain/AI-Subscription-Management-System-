@@ -4,18 +4,10 @@ import {
   ScrollView, KeyboardAvoidingView, Platform
 } from "react-native";
 import { useRouter } from "expo-router";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { CreditCard as CardIcon, User, Calendar, Lock } from "lucide-react-native";
 import CreditCard from "../../components/ui/CreditCard";
 
 type FocusedField = "number" | "name" | "expiry" | "cvv" | null;
-
-const fields = [
-  { key: "number" as FocusedField, label: "Card Number",    placeholder: "•••• •••• •••• ••••", icon: CardIcon, keyboard: "numeric" as const, maxLen: 19 },
-  { key: "name"   as FocusedField, label: "Cardholder Name", placeholder: "Full name on card",   icon: User,    keyboard: "default" as const, maxLen: 40 },
-  { key: "expiry" as FocusedField, label: "Expiry Date",    placeholder: "MM / YY",              icon: Calendar, keyboard: "numeric" as const, maxLen: 5 },
-  { key: "cvv"    as FocusedField, label: "CVV / CVC",      placeholder: "•••",                  icon: Lock,    keyboard: "numeric" as const, secure: true, maxLen: 4 },
-];
 
 export default function AddNewCardPage() {
   const router = useRouter();
@@ -26,9 +18,13 @@ export default function AddNewCardPage() {
   const [focused, setFocused] = useState<FocusedField>(null);
 
   const getValue = (key: FocusedField) => {
-    if (key === "number") return number;
+    if (key === "number") {
+      return number.replace(/\D/g, "").replace(/(.{4})/g, "$1 ").trim();
+    }
     if (key === "name")   return name;
-    if (key === "expiry") return expiry;
+    if (key === "expiry") {
+      return expiry.length > 2 ? `${expiry.slice(0, 2)}/${expiry.slice(2)}` : expiry;
+    }
     if (key === "cvv")    return cvv;
     return "";
   };
@@ -41,8 +37,10 @@ export default function AddNewCardPage() {
       setName(text);
     } else if (key === "expiry") {
       const c = text.replace(/\D/g, "");
-      if (c.length <= 4)
-        setExpiry(c.length > 2 ? `${c.slice(0, 2)}/${c.slice(2)}` : c);
+      if (c.length <= 4) {
+        // Only format for the display, keep state as digits
+        setExpiry(c);
+      }
     } else if (key === "cvv") {
       const c = text.replace(/\D/g, "");
       if (c.length <= 4) setCvv(c);
@@ -52,51 +50,138 @@ export default function AddNewCardPage() {
   return (
     <KeyboardAvoidingView
       style={styles.root}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      enabled={Platform.OS === "ios"}
     >
+      {/* Fixed Card Preview at top for stability */}
+      <View style={styles.previewContainer}>
+        <CreditCard 
+          key={`card-${number}-${name}-${expiry}-${cvv}`}
+          number={number} 
+          name={name} 
+          expiry={expiry} 
+          cvv={cvv} 
+          focused={focused} 
+        />
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
         showsVerticalScrollIndicator={false}
       >
-        {/* Live card preview */}
-        <Animated.View entering={FadeInDown.duration(500)}>
-          <CreditCard number={number} name={name} expiry={expiry} cvv={cvv} focused={focused} />
-        </Animated.View>
+        <View style={styles.form}>
+          {/* Card Number */}
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, focused === "number" && styles.fieldLabelActive]}>
+              Card Number
+            </Text>
+            <View style={styles.inputRow}>
+              <CardIcon size={18} color={focused === "number" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="•••• •••• •••• ••••"
+                placeholderTextColor="#4a4d58"
+                value={getValue("number")}
+                onChangeText={(t) => handleChange("number", t)}
+                onFocus={() => setFocused("number")}
+                onBlur={() => {}}
+                keyboardType="numeric"
+                maxLength={19}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+                // @ts-ignore
+                outlineStyle="none"
+              />
+            </View>
+          </View>
 
-        {/* Form */}
-        <Animated.View entering={FadeInDown.duration(500).delay(120)} style={styles.form}>
-          {fields.map((f) => {
-            const Icon = f.icon;
-            const isFocused = focused === f.key;
-            return (
-              <View key={f.key as string} style={styles.fieldBlock}>
-                <Text style={[styles.fieldLabel, isFocused && styles.fieldLabelActive]}>
-                  {f.label}
-                </Text>
-                <View style={[styles.inputRow, isFocused && styles.inputRowFocused]}>
-                  <Icon size={18} color={isFocused ? "#14ed9e" : "#7e828d"} style={styles.icon} />
-                  <TextInput
-                    style={styles.input}
-                    placeholder={f.placeholder}
-                    placeholderTextColor="#4a4d58"
-                    value={getValue(f.key)}
-                    onChangeText={(t) => handleChange(f.key, t)}
-                    onFocus={() => setFocused(f.key)}
-                    onBlur={() => setFocused(null)}
-                    keyboardType={f.keyboard}
-                    secureTextEntry={!!f.secure}
-                    maxLength={f.maxLen}
-                    selectionColor="#14ed9e"
-                    autoCapitalize={f.key === "name" ? "words" : "none"}
-                    // @ts-ignore
-                    outlineStyle="none"
-                  />
-                </View>
+          {/* Cardholder Name */}
+          <View style={styles.fieldBlock}>
+            <Text style={[styles.fieldLabel, focused === "name" && styles.fieldLabelActive]}>
+              Cardholder Name
+            </Text>
+            <View style={styles.inputRow}>
+              <User size={18} color={focused === "name" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="Full name on card"
+                placeholderTextColor="#4a4d58"
+                value={getValue("name")}
+                onChangeText={(t) => handleChange("name", t)}
+                onFocus={() => setFocused("name")}
+                onBlur={() => {}}
+                keyboardType="default"
+                maxLength={40}
+                selectionColor="#14ed9e"
+                autoCapitalize="words"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+                // @ts-ignore
+                outlineStyle="none"
+              />
+            </View>
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 14 }}>
+            {/* Expiry */}
+            <View style={[styles.fieldBlock, { flex: 1 }]}>
+              <Text style={[styles.fieldLabel, focused === "expiry" && styles.fieldLabelActive]}>
+                Expiry Date
+              </Text>
+              <View style={styles.inputRow}>
+                <Calendar size={18} color={focused === "expiry" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="MM / YY"
+                  placeholderTextColor="#4a4d58"
+                  value={getValue("expiry")}
+                  onChangeText={(t) => handleChange("expiry", t)}
+                  onFocus={() => setFocused("expiry")}
+                  onBlur={() => {}}
+                  keyboardType="numeric"
+                  maxLength={5}
+                  selectionColor="#14ed9e"
+                  autoComplete="off"
+                  importantForAutofill="no"
+                  blurOnSubmit={false}
+                  // @ts-ignore
+                  outlineStyle="none"
+                />
               </View>
-            );
-          })}
+            </View>
+
+            {/* CVV */}
+            <View style={[styles.fieldBlock, { flex: 1 }]}>
+              <Text style={[styles.fieldLabel, focused === "cvv" && styles.fieldLabelActive]}>
+                CVV / CVC
+              </Text>
+              <View style={styles.inputRow}>
+                <Lock size={18} color={focused === "cvv" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+                <TextInput
+                  style={styles.input}
+                  placeholder="•••"
+                  placeholderTextColor="#4a4d58"
+                  value={getValue("cvv")}
+                  onChangeText={(t) => handleChange("cvv", t)}
+                  onFocus={() => setFocused("cvv")}
+                  onBlur={() => {}}
+                  keyboardType="numeric"
+                  secureTextEntry
+                  maxLength={4}
+                  selectionColor="#14ed9e"
+                  autoComplete="off"
+                  importantForAutofill="no"
+                  blurOnSubmit={false}
+                  // @ts-ignore
+                  outlineStyle="none"
+                />
+              </View>
+            </View>
+          </View>
 
           <TouchableOpacity
             style={styles.cta}
@@ -110,7 +195,7 @@ export default function AddNewCardPage() {
             <Lock size={11} color="#4a4d58" />
             <Text style={styles.secureText}>256-bit encrypted · Never stored in plaintext</Text>
           </View>
-        </Animated.View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -119,6 +204,12 @@ export default function AddNewCardPage() {
 const styles = StyleSheet.create({
   root:   { flex: 1, backgroundColor: "#0d0e12" },
   scroll: { paddingHorizontal: 22, paddingTop: 10, paddingBottom: 48 },
+
+  previewContainer: {
+    paddingHorizontal: 22,
+    paddingTop: 10,
+    backgroundColor: "#0d0e12",
+  },
 
   form: { gap: 14, marginTop: 8 },
 
@@ -131,10 +222,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#15161d",
     borderRadius: 12, borderWidth: 1, borderColor: "#22232d",
     paddingHorizontal: 14, height: 52,
-  },
-  inputRowFocused: {
-    borderColor: "#14ed9e",
-    shadowColor: "#14ed9e", shadowOpacity: 0.12, shadowRadius: 8, elevation: 4,
   },
   icon:  { marginRight: 10 },
   input: {

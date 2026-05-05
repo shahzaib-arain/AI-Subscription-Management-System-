@@ -41,6 +41,12 @@ export default function CardsLayout() {
           title: "Add Card",
         }} 
       />
+      <Stack.Screen 
+        name="edit/[id]" 
+        options={{ 
+          title: "Edit Card",
+        }} 
+      />
     </Stack>
   );
 }

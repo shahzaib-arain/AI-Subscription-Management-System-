@@ -14,7 +14,7 @@ export default function SignUpPage() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <Animated.View entering={FadeInDown.duration(600).delay(200)} style={styles.formContainer}>
+      <View style={styles.formContainer}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Text style={styles.logoText}>NP</Text>
@@ -24,19 +24,24 @@ export default function SignUpPage() {
         </View>
 
         <View style={styles.inputGroup}>
-          <View style={[styles.inputWrapper, focused === "name" && styles.inputWrapperFocused]}>
+          <View style={styles.inputWrapper}>
             <User size={20} color={focused === "name" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Full Name"
               placeholderTextColor="#7e828d"
               style={styles.input}
               autoCapitalize="words"
-              onFocus={() => setFocused("name")}
-              onBlur={() => setFocused(null)}
+              onFocus={() => {
+                setTimeout(() => setFocused("name"), 50);
+              }}
+              onBlur={() => {}}
               selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
             />
           </View>
-          <View style={[styles.inputWrapper, focused === "email" && styles.inputWrapperFocused]}>
+          <View style={styles.inputWrapper}>
             <Mail size={20} color={focused === "email" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Email address"
@@ -44,33 +49,48 @@ export default function SignUpPage() {
               style={styles.input}
               keyboardType="email-address"
               autoCapitalize="none"
-              onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
+              onFocus={() => {
+                setTimeout(() => setFocused("email"), 50);
+              }}
+              onBlur={() => {}}
               selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
             />
           </View>
-          <View style={[styles.inputWrapper, focused === "password" && styles.inputWrapperFocused]}>
+          <View style={styles.inputWrapper}>
             <Lock size={20} color={focused === "password" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Password"
               placeholderTextColor="#7e828d"
               style={styles.input}
               secureTextEntry
-              onFocus={() => setFocused("password")}
-              onBlur={() => setFocused(null)}
+              onFocus={() => {
+                setTimeout(() => setFocused("password"), 50);
+              }}
+              onBlur={() => {}}
               selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
             />
           </View>
-          <View style={[styles.inputWrapper, focused === "confirm" && styles.inputWrapperFocused]}>
+          <View style={styles.inputWrapper}>
             <Lock size={20} color={focused === "confirm" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Confirm Password"
               placeholderTextColor="#7e828d"
               style={styles.input}
               secureTextEntry
-              onFocus={() => setFocused("confirm")}
-              onBlur={() => setFocused(null)}
+              onFocus={() => {
+                setTimeout(() => setFocused("confirm"), 50);
+              }}
+              onBlur={() => {}}
               selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
             />
           </View>
         </View>
@@ -88,7 +108,7 @@ export default function SignUpPage() {
             </TouchableOpacity>
           </Link>
         </View>
-      </Animated.View>
+      </View>
     </ScrollView>
   );
 }

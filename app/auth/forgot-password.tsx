@@ -14,7 +14,7 @@ export default function ForgotPasswordPage() {
 
   return (
     <View style={styles.container}>
-      <Animated.View entering={FadeInDown.duration(600).delay(200)} style={styles.formContainer}>
+      <View style={styles.formContainer}>
         
         <TouchableOpacity style={styles.backButton} onPress={() => router.push("/auth/login")}>
            <ArrowLeft size={16} color="#7e828d" />
@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
         </View>
 
         <View style={styles.inputGroup}>
-          <View style={[styles.inputWrapper, focused && styles.inputWrapperFocused]}>
+          <View style={styles.inputWrapper}>
             <Mail size={20} color={focused ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Email address"
@@ -40,9 +40,14 @@ export default function ForgotPasswordPage() {
               style={styles.input}
               keyboardType="email-address"
               autoCapitalize="none"
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
+              onFocus={() => {
+                setTimeout(() => setFocused(true), 50);
+              }}
+              onBlur={() => {}}
               selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
             />
           </View>
         </View>
@@ -52,7 +57,7 @@ export default function ForgotPasswordPage() {
           <ArrowRight size={18} color="#0d0e12" />
         </TouchableOpacity>
 
-      </Animated.View>
+      </View>
     </View>
   );
 }
@@ -60,7 +65,7 @@ export default function ForgotPasswordPage() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0d0e12", paddingHorizontal: 24, justifyContent: "center" },
   formContainer: { width: "100%" },
-  backButton: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 32 },
+  backButton: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 32, alignSelf: "flex-start" },
   backText: { color: "#7e828d", fontSize: 14, fontWeight: "500", fontFamily: "Manrope_500Medium" },
   header: { alignItems: "center", marginBottom: 40 },
   logoContainer: { width: 64, height: 64, borderRadius: 16, backgroundColor: "#14ed9e", alignItems: "center", justifyContent: "center", marginBottom: 24, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 20, elevation: 10 },

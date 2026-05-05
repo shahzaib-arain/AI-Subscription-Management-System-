@@ -14,7 +14,7 @@ export default function SignInPage() {
 
   return (
     <View style={styles.container}>
-      <Animated.View entering={FadeInDown.duration(600).delay(200)} style={styles.formContainer}>
+      <View style={styles.formContainer}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
             <Text style={styles.logoText}>NP</Text>
@@ -24,7 +24,7 @@ export default function SignInPage() {
         </View>
 
         <View style={styles.inputGroup}>
-          <View style={[styles.inputWrapper, focused === "email" && styles.inputWrapperFocused]}>
+          <View style={styles.inputWrapper}>
             <Mail size={20} color={focused === "email" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Email address"
@@ -32,21 +32,31 @@ export default function SignInPage() {
               style={styles.input}
               keyboardType="email-address"
               autoCapitalize="none"
-              onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
+              onFocus={() => {
+                setTimeout(() => setFocused("email"), 50);
+              }}
+              onBlur={() => {}}
               selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
             />
           </View>
-          <View style={[styles.inputWrapper, focused === "password" && styles.inputWrapperFocused]}>
+          <View style={styles.inputWrapper}>
             <Lock size={20} color={focused === "password" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Password"
               placeholderTextColor="#7e828d"
               style={styles.input}
               secureTextEntry
-              onFocus={() => setFocused("password")}
-              onBlur={() => setFocused(null)}
+              onFocus={() => {
+                setTimeout(() => setFocused("password"), 50);
+              }}
+              onBlur={() => {}}
               selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
             />
           </View>
         </View>
@@ -72,7 +82,7 @@ export default function SignInPage() {
             </TouchableOpacity>
           </Link>
         </View>
-      </Animated.View>
+      </View>
     </View>
   );
 }
