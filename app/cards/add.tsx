@@ -1,10 +1,11 @@
+import { useRouter } from "expo-router";
+import { Calendar, CreditCard as CardIcon, Lock, User } from "lucide-react-native";
 import { useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, KeyboardAvoidingView, Platform
+    StyleSheet,
+    Text, TextInput, TouchableOpacity,
+    View
 } from "react-native";
-import { useRouter } from "expo-router";
-import { CreditCard as CardIcon, User, Calendar, Lock } from "lucide-react-native";
 import CreditCard from "../../components/ui/CreditCard";
 
 type FocusedField = "number" | "name" | "expiry" | "cvv" | null;

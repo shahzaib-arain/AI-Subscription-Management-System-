@@ -1,14 +1,14 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, TouchableWithoutFeedback } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-  interpolate,
-  Extrapolation,
-} from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect } from "react";
+import { StyleSheet, Text, TouchableWithoutFeedback, View } from "react-native";
+import Animated, {
+    Extrapolation,
+    interpolate,
+    useAnimatedStyle,
+    useSharedValue,
+    withSpring,
+    withTiming,
+} from "react-native-reanimated";
 
 interface CreditCardProps {
   number: string;
