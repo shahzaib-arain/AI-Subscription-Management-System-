@@ -121,9 +121,13 @@ export default function CreditCard({ number, name, expiry, cvv, focused }: Credi
 
             {/* Footer */}
             <View style={styles.footer}>
-              <View>
+              <View style={styles.nameBlock}>
                 <Text style={styles.fieldLabel}>CARDHOLDER NAME</Text>
-                <Text style={[styles.fieldValue, focused === "name" && styles.activeText]}>
+                <Text 
+                  style={[styles.fieldValue, focused === "name" && styles.activeText]}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {name ? name.toUpperCase() : "YOUR NAME"}
                 </Text>
               </View>
@@ -188,7 +192,7 @@ export default function CreditCard({ number, name, expiry, cvv, focused }: Credi
 const styles = StyleSheet.create({
   wrapper: {
     width: "100%",
-    height: 210,
+    height: 230,
     marginVertical: 20,
   },
   side: {
@@ -309,6 +313,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-end",
+  },
+  nameBlock: {
+    flex: 1,
+    marginRight: 10,
   },
   expiryBlock: {
     alignItems: "flex-end",

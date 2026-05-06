@@ -56,7 +56,7 @@ export default function AddNewCardPage() {
         <CreditCard 
           number={number} 
           name={name} 
-          expiry={expiry} 
+          expiry={expiry.length > 2 ? `${expiry.slice(0, 2)}/${expiry.slice(2)}` : expiry} 
           cvv={cvv} 
           focused={focused} 
         />

@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   root:   { flex: 1, backgroundColor: "#0d0e12" },
   scroll: { paddingHorizontal: 22, paddingTop: 10, paddingBottom: 48 },
 
-  heading: { paddingTop: 60, paddingBottom: 10, alignItems: "center", paddingHorizontal: 22 },
+  heading: { paddingTop: 20, paddingBottom: 10, alignItems: "center", paddingHorizontal: 22 },
   title:   { color: "#fcfcfc", fontSize: 26, fontFamily: "Manrope_800ExtraBold", letterSpacing: -0.5 },
   subtitle: { color: "#7e828d", fontSize: 13, fontFamily: "Manrope_400Regular", marginTop: 6, textAlign: "center", lineHeight: 20 },
 
