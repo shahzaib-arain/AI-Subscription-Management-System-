@@ -4,6 +4,8 @@ import { useRouter, Link } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Mail, Lock, User, ArrowRight } from "lucide-react-native";
 
+import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+
 export default function SignUpPage() {
   const router = useRouter();
   const [focused, setFocused] = useState<string | null>(null);
@@ -13,7 +15,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <KeyboardAvoidingWrapper contentContainerStyle={styles.scrollContent}>
       <View style={styles.formContainer}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
@@ -109,13 +111,19 @@ export default function SignUpPage() {
           </Link>
         </View>
       </View>
-    </ScrollView>
+    </KeyboardAvoidingWrapper>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0d0e12" },
-  scrollContent: { flexGrow: 1, paddingHorizontal: 24, justifyContent: "center", paddingVertical: 40 },
+  scrollContent: { 
+    flexGrow: 1, 
+    paddingHorizontal: 24, 
+    justifyContent: "center", 
+    paddingTop: 80, 
+    paddingBottom: 40 
+  },
   formContainer: { width: "100%" },
   header: { alignItems: "center", marginBottom: 32 },
   logoContainer: { width: 64, height: 64, borderRadius: 16, backgroundColor: "#14ed9e", alignItems: "center", justifyContent: "center", marginBottom: 24, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 20, elevation: 10 },

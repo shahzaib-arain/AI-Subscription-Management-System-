@@ -4,6 +4,8 @@ import { useRouter, Link } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Mail, Lock, ArrowRight } from "lucide-react-native";
 
+import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+
 export default function SignInPage() {
   const router = useRouter();
   const [focused, setFocused] = useState<string | null>(null);
@@ -13,7 +15,7 @@ export default function SignInPage() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingWrapper contentContainerStyle={styles.container}>
       <View style={styles.formContainer}>
         <View style={styles.header}>
           <View style={styles.logoContainer}>
@@ -83,14 +85,19 @@ export default function SignInPage() {
           </Link>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0d0e12", paddingHorizontal: 24, justifyContent: "center" },
-  formContainer: { width: "100%" },
-  header: { alignItems: "center", marginBottom: 32 },
+  container: { 
+    flexGrow: 1, 
+    paddingHorizontal: 24, 
+    justifyContent: "center",
+    paddingBottom: 20 
+  },
+  formContainer: { width: "100%", paddingTop: 40 },
+  header: { alignItems: "center", marginBottom: 32, marginTop: 20 },
   logoContainer: { width: 64, height: 64, borderRadius: 16, backgroundColor: "#14ed9e", alignItems: "center", justifyContent: "center", marginBottom: 24, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 20, elevation: 10 },
   logoText: { color: "#0d0e12", fontSize: 24, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
   title: { fontSize: 28, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_700Bold" },

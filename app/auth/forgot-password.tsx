@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Mail, ArrowRight, ArrowLeft } from "lucide-react-native";
 
+import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [focused, setFocused] = useState<boolean>(false);
@@ -13,7 +15,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingWrapper contentContainerStyle={styles.container}>
       <View style={styles.formContainer}>
         
         <TouchableOpacity style={styles.backButton} onPress={() => router.push("/auth/login")}>
@@ -58,12 +60,18 @@ export default function ForgotPasswordPage() {
         </TouchableOpacity>
 
       </View>
-    </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0d0e12", paddingHorizontal: 24, justifyContent: "center" },
+  container: { 
+    flexGrow: 1, 
+    paddingHorizontal: 24, 
+    justifyContent: "center", 
+    paddingTop: 80, 
+    paddingBottom: 40 
+  },
   formContainer: { width: "100%" },
   backButton: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 32, alignSelf: "flex-start" },
   backText: { color: "#7e828d", fontSize: 14, fontWeight: "500", fontFamily: "Manrope_500Medium" },

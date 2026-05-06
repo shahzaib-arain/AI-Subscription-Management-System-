@@ -9,6 +9,8 @@ import CreditCard from "../../components/ui/CreditCard";
 
 type FocusedField = "number" | "name" | "expiry" | "cvv" | null;
 
+import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+
 export default function AddCardPage() {
   const router = useRouter();
   const [number, setNumber] = useState("");
@@ -48,11 +50,7 @@ export default function AddCardPage() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.root}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      enabled={Platform.OS === "ios"}
-    >
+    <KeyboardAvoidingWrapper contentContainerStyle={styles.scroll}>
       {/* Page heading */}
       <View style={styles.heading}>
         <Text style={styles.title}>Add Payment Card</Text>
@@ -61,145 +59,149 @@ export default function AddCardPage() {
         </Text>
       </View>
 
-      {/* Fixed Card Preview for stability */}
       <View style={styles.previewContainer}>
-        <CreditCard number={number} name={name} expiry={expiry} cvv={cvv} focused={focused} />
+        <CreditCard 
+          number={number} 
+          name={name} 
+          expiry={expiry} 
+          cvv={cvv} 
+          focused={focused} 
+        />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.form}>
-          {/* Card Number */}
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, focused === "number" && styles.fieldLabelActive]}>
-              Card Number
-            </Text>
-            <View style={styles.inputRow}>
-              <CardIcon size={18} color={focused === "number" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
-              <TextInput
-                style={styles.input}
-                placeholder="•••• •••• •••• ••••"
-                placeholderTextColor="#4a4d58"
-                value={getValue("number")}
-                onChangeText={(t) => handleChange("number", t)}
-                onFocus={() => handleFocus("number")}
-                onBlur={() => {}}
-                keyboardType="numeric"
-                maxLength={19}
-                selectionColor="#14ed9e"
-                autoComplete="off"
-                importantForAutofill="no"
-                blurOnSubmit={false}
-                // @ts-ignore
-                outlineStyle="none"
-              />
-            </View>
-          </View>
-
-          {/* Cardholder Name */}
-          <View style={styles.fieldBlock}>
-            <Text style={[styles.fieldLabel, focused === "name" && styles.fieldLabelActive]}>
-              Cardholder Name
-            </Text>
-            <View style={styles.inputRow}>
-              <User size={18} color={focused === "name" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Full name on card"
-                placeholderTextColor="#4a4d58"
-                value={getValue("name")}
-                onChangeText={(t) => handleChange("name", t)}
-                onFocus={() => handleFocus("name")}
-                onBlur={() => {}}
-                keyboardType="default"
-                maxLength={40}
-                selectionColor="#14ed9e"
-                autoCapitalize="words"
-                autoComplete="off"
-                importantForAutofill="no"
-                blurOnSubmit={false}
-                // @ts-ignore
-                outlineStyle="none"
-              />
-            </View>
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 14 }}>
-            {/* Expiry */}
-            <View style={[styles.fieldBlock, { flex: 1 }]}>
-              <Text style={[styles.fieldLabel, focused === "expiry" && styles.fieldLabelActive]}>
-                Expiry
-              </Text>
-              <View style={styles.inputRow}>
-                <Calendar size={18} color={focused === "expiry" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="MM / YY"
-                  placeholderTextColor="#4a4d58"
-                  value={getValue("expiry")}
-                  onChangeText={(t) => handleChange("expiry", t)}
-                  onFocus={() => handleFocus("expiry")}
-                  onBlur={() => {}}
-                  keyboardType="numeric"
-                  maxLength={5}
-                  selectionColor="#14ed9e"
-                  autoComplete="off"
-                  importantForAutofill="no"
-                  blurOnSubmit={false}
-                  // @ts-ignore
-                  outlineStyle="none"
-                />
-              </View>
-            </View>
-
-            {/* CVV */}
-            <View style={[styles.fieldBlock, { flex: 1 }]}>
-              <Text style={[styles.fieldLabel, focused === "cvv" && styles.fieldLabelActive]}>
-                CVV
-              </Text>
-              <View style={styles.inputRow}>
-                <Lock size={18} color={focused === "cvv" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="•••"
-                  placeholderTextColor="#4a4d58"
-                  value={getValue("cvv")}
-                  onChangeText={(t) => handleChange("cvv", t)}
-                  onFocus={() => handleFocus("cvv")}
-                  onBlur={() => {}}
-                  keyboardType="numeric"
-                  secureTextEntry
-                  maxLength={4}
-                  selectionColor="#14ed9e"
-                  autoComplete="off"
-                  importantForAutofill="no"
-                  blurOnSubmit={false}
-                  // @ts-ignore
-                  outlineStyle="none"
-                />
-              </View>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={styles.cta}
-            onPress={() => router.replace("/(tabs)")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.ctaText}>Save & Continue</Text>
-            <ArrowRight size={18} color="#0d0e12" strokeWidth={3} />
-          </TouchableOpacity>
-
-          <View style={styles.secureRow}>
-            <Lock size={11} color="#4a4d58" />
-            <Text style={styles.secureText}>256-bit encrypted · Never stored in plaintext</Text>
+      <View style={styles.form}>
+        {/* Card Number */}
+        <View style={styles.fieldBlock}>
+          <Text style={[styles.fieldLabel, focused === "number" && styles.fieldLabelActive]}>
+            Card Number
+          </Text>
+          <View style={styles.inputRow}>
+            <CardIcon size={18} color={focused === "number" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="•••• •••• •••• ••••"
+              placeholderTextColor="#4a4d58"
+              value={getValue("number")}
+              onChangeText={(t) => handleChange("number", t)}
+              onFocus={() => handleFocus("number")}
+              onBlur={() => {}}
+              keyboardType="numeric"
+              maxLength={19}
+              selectionColor="#14ed9e"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
+              // @ts-ignore
+              outlineStyle="none"
+            />
           </View>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+
+        {/* Cardholder Name */}
+        <View style={styles.fieldBlock}>
+          <Text style={[styles.fieldLabel, focused === "name" && styles.fieldLabelActive]}>
+            Cardholder Name
+          </Text>
+          <View style={styles.inputRow}>
+            <User size={18} color={focused === "name" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Full name on card"
+              placeholderTextColor="#4a4d58"
+              value={name}
+              onChangeText={setName}
+              onFocus={() => handleFocus("name")}
+              onBlur={() => {}}
+              keyboardType="default"
+              maxLength={40}
+              selectionColor="#14ed9e"
+              autoCapitalize="words"
+              autoComplete="off"
+              importantForAutofill="no"
+              blurOnSubmit={false}
+              // @ts-ignore
+              outlineStyle="none"
+            />
+          </View>
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 14 }}>
+          {/* Expiry */}
+          <View style={[styles.fieldBlock, { flex: 1 }]}>
+            <Text style={[styles.fieldLabel, focused === "expiry" && styles.fieldLabelActive]}>
+              Expiry
+            </Text>
+            <View style={styles.inputRow}>
+              <Calendar size={18} color={focused === "expiry" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="MM / YY"
+                placeholderTextColor="#4a4d58"
+                value={expiry}
+                onChangeText={(t) => {
+                  const cleaned = t.replace(/\D/g, "");
+                  if (cleaned.length <= 4) {
+                    setExpiry(cleaned.length > 2 ? `${cleaned.slice(0, 2)}/${cleaned.slice(2)}` : cleaned);
+                  }
+                }}
+                onFocus={() => handleFocus("expiry")}
+                onBlur={() => {}}
+                keyboardType="numeric"
+                maxLength={5}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+                // @ts-ignore
+                outlineStyle="none"
+              />
+            </View>
+          </View>
+
+          {/* CVV */}
+          <View style={[styles.fieldBlock, { flex: 1 }]}>
+            <Text style={[styles.fieldLabel, focused === "cvv" && styles.fieldLabelActive]}>
+              CVV
+            </Text>
+            <View style={styles.inputRow}>
+              <Lock size={18} color={focused === "cvv" ? "#14ed9e" : "#7e828d"} style={styles.icon} />
+              <TextInput
+                style={styles.input}
+                placeholder="•••"
+                placeholderTextColor="#4a4d58"
+                value={getValue("cvv")}
+                onChangeText={(t) => handleChange("cvv", t)}
+                onFocus={() => handleFocus("cvv")}
+                onBlur={() => {}}
+                keyboardType="numeric"
+                secureTextEntry
+                maxLength={4}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+                // @ts-ignore
+                outlineStyle="none"
+              />
+            </View>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={styles.cta}
+          onPress={() => router.replace("/(tabs)")}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.ctaText}>Save & Continue</Text>
+          <ArrowRight size={18} color="#0d0e12" strokeWidth={3} />
+        </TouchableOpacity>
+
+        <View style={styles.secureRow}>
+          <Lock size={11} color="#4a4d58" />
+          <Text style={styles.secureText}>256-bit encrypted · Never stored in plaintext</Text>
+        </View>
+      </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 

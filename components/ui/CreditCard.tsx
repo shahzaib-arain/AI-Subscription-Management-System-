@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 12,
   },
   brandRow: {
     flexDirection: "row",
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
 
   // Chip
   chipOuter: {
-    marginBottom: 16,
+    marginBottom: 10,
   },
   chip: {
     width: 44,
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_700Bold",
     fontSize: 19,
     letterSpacing: 3,
-    marginBottom: 18,
+    marginBottom: 12,
   },
 
   // Footer
