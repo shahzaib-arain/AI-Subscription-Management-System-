@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "fintech-mobile",
-    "slug": "fintech-mobile",
+    "name": "NeuroPay",
+    "slug": "neuro-pay",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "fintechmobile",
+    "scheme": "neuropay",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
