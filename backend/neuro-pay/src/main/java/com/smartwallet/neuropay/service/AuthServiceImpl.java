@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
 
             tokenRepository.save(resetToken);
 
-            String resetLink = frontendUrl + "/reset-password?token=" + token;
+            String resetLink = frontendUrl + "/auth/reset-password?token=" + token;
             mailService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), resetLink);
 
             log.info("Password reset email triggered for: {}", user.getEmail());
