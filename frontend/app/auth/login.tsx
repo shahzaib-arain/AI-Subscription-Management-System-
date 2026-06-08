@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, Link } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { Mail, Lock, ArrowRight } from "lucide-react-native";
+import { useAuth } from "../../context/AuthContext";
 
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
 
@@ -10,9 +11,36 @@ export default function SignInPage() {
   const router = useRouter();
   const [focused, setFocused] = useState<string | null>(null);
 
-  const handleSignIn = () => {
-    router.replace("/(tabs)");
+  const { login, error: apiError, clearError } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const handleSignIn = async () => {
+    setValidationError(null);
+    clearError();
+
+    if (!email.trim() || !password) {
+      setValidationError("Please enter your email and password.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await login({
+        email: email.trim(),
+        password,
+      });
+      router.replace("/(tabs)");
+    } catch (err: any) {
+      // error is handled by AuthContext
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const displayError = validationError || apiError;
 
   return (
     <KeyboardAvoidingWrapper contentContainerStyle={styles.container}>
@@ -25,19 +53,25 @@ export default function SignInPage() {
           <Text style={styles.subtitle}>Sign in to continue to NeuroPay</Text>
         </View>
 
+        {displayError && (
+          <View style={styles.errorAlert}>
+            <Text style={styles.errorAlertText}>{displayError}</Text>
+          </View>
+        )}
+
         <View style={styles.inputGroup}>
           <View style={styles.inputWrapper}>
             <Mail size={20} color={focused === "email" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Email address"
               placeholderTextColor="#7e828d"
+              value={email}
+              onChangeText={setEmail}
               style={styles.input}
               keyboardType="email-address"
               autoCapitalize="none"
-              onFocus={() => {
-                setTimeout(() => setFocused("email"), 50);
-              }}
-              onBlur={() => {}}
+              onFocus={() => setFocused("email")}
+              onBlur={() => setFocused(null)}
               selectionColor="#14ed9e"
               autoComplete="off"
               importantForAutofill="no"
@@ -49,12 +83,12 @@ export default function SignInPage() {
             <TextInput
               placeholder="Password"
               placeholderTextColor="#7e828d"
+              value={password}
+              onChangeText={setPassword}
               style={styles.input}
               secureTextEntry
-              onFocus={() => {
-                setTimeout(() => setFocused("password"), 50);
-              }}
-              onBlur={() => {}}
+              onFocus={() => setFocused("password")}
+              onBlur={() => setFocused(null)}
               selectionColor="#14ed9e"
               autoComplete="off"
               importantForAutofill="no"
@@ -71,9 +105,19 @@ export default function SignInPage() {
           </Link>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSignIn}>
-          <Text style={styles.submitText}>Sign In</Text>
-          <ArrowRight size={18} color="#0d0e12" />
+        <TouchableOpacity 
+          style={styles.submitButton} 
+          onPress={handleSignIn}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#0d0e12" />
+          ) : (
+            <>
+              <Text style={styles.submitText}>Sign In</Text>
+              <ArrowRight size={18} color="#0d0e12" />
+            </>
+          )}
         </TouchableOpacity>
 
         <View style={styles.footer}>
@@ -123,5 +167,20 @@ const styles = StyleSheet.create({
   submitText: { color: "#0d0e12", fontSize: 16, fontWeight: "600", fontFamily: "Manrope_700Bold" },
   footer: { flexDirection: "row", justifyContent: "center", marginTop: 32 },
   footerText: { color: "#7e828d", fontSize: 14, fontFamily: "Manrope_400Regular" },
-  linkText: { color: "#14ed9e", fontSize: 14, fontWeight: "600", fontFamily: "Manrope_600SemiBold" }
+  linkText: { color: "#14ed9e", fontSize: 14, fontWeight: "600", fontFamily: "Manrope_600SemiBold" },
+  errorAlert: {
+    backgroundColor: "rgba(245, 34, 34, 0.15)",
+    borderWidth: 1,
+    borderColor: "#f52222",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    width: "100%",
+  },
+  errorAlertText: {
+    color: "#ff4e83",
+    fontSize: 14,
+    fontFamily: "Manrope_500Medium",
+    textAlign: "center",
+  }
 });

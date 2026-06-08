@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Home, CreditCard, Shield, Bell, User } from "lucide-react-native";
+import { Home, CreditCard, Wallet, Bell, User } from "lucide-react-native";
 import { View, StyleSheet } from "react-native";
 
 export default function TabLayout() {
@@ -37,12 +37,12 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="activity"
+        name="wallet"
         options={{
-          title: "Activity",
+          title: "Wallet",
           tabBarIcon: ({ color, focused }) => (
             <View style={focused ? styles.activeIcon : styles.inactiveIcon}>
-              <Shield size={24} color={color} />
+              <Wallet size={24} color={color} />
             </View>
           ),
         }}
