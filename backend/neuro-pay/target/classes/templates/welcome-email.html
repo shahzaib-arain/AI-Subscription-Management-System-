@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .header { background: linear-gradient(135deg, #6C63FF, #3B82F6); padding: 40px; text-align: center; }
+        .header h1 { color: #fff; margin: 0; font-size: 28px; }
+        .header p { color: rgba(255,255,255,0.85); margin: 8px 0 0; }
+        .body { padding: 40px; }
+        .card-box { background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; }
+        .card-label { color: rgba(255,255,255,0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 2px; }
+        .card-number { color: #fff; font-size: 22px; font-family: monospace; letter-spacing: 4px; margin-top: 8px; }
+        .info { color: #555; font-size: 15px; line-height: 1.7; }
+        .footer { background: #f4f6f9; padding: 20px; text-align: center; color: #999; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Welcome to NeuroPay 🎉</h1>
+        <p>Your Smart Wallet is ready</p>
+    </div>
+    <div class="body">
+        <p class="info">Hi <strong th:text="${name}">User</strong>,</p>
+        <p class="info">Your account has been created successfully. Here is your unique Virtual Card Number — keep it safe!</p>
+        <div class="card-box">
+            <div class="card-label">Your Virtual Card Number</div>
+            <div class="card-number" th:text="${virtualCardNumber}">XXXX-XXXX-XXXX-XXXX</div>
+        </div>
+        <p class="info">You can now add funds to your wallet and start managing your subscriptions from a single dashboard.</p>
+        <p class="info">If you didn't create this account, please contact our support team immediately.</p>
+    </div>
+    <div class="footer">© 2026 NeuroPay · Muhammad Ali Jinnah University</div>
+</div>
+</body>
+</html>
