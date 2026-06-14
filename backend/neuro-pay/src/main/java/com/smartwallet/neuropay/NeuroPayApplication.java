@@ -10,4 +10,4 @@ public class NeuroPayApplication {
 		SpringApplication.run(NeuroPayApplication.class, args);
 	}
 
-}
+}   
