@@ -1,12 +1,7 @@
 import { Platform } from "react-native";
 
 const getBaseUrl = () => {
-  // Use 10.0.2.2 for Android emulator to access the host machine's localhost
-  if (Platform.OS === "android") {
-    return "http://10.0.2.2:8080/api/v1";
-  }
-  // Standard localhost for iOS emulators and web browsers
-  return "http://localhost:8080/api/v1";
+  return "http://192.168.18.34:8080/api/v1";
 };
 
 export const API_BASE_URL = getBaseUrl();

@@ -18,7 +18,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.zaiby786.fintechmobile"
+      "package": "com.zaiby786.fintechmobile",
+      "usesCleartextTraffic": true
     },
     "web": {
       "output": "static",
