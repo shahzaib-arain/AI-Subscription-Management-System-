@@ -44,5 +44,5 @@ application:
     expiration: 86400000        # 24 hours in ms
     refresh-expiration: 604800000  # 7 days in ms
 
-  frontend-url: http://localhost:3000   # Your mobile app deep link or web URL
+  frontend-url: http://localhost:8081   # Your mobile app deep link or web URL
   password-reset-token-expiry: 15      # minutes
