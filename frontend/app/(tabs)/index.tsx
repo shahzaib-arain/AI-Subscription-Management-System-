@@ -7,7 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function HomePage() {
   const router = useRouter();
-  const { user, walletBalance } = useAuth();
+  const { user, wallet, walletLoading } = useAuth();
+  const walletBalanceText = wallet ? `$${wallet.balance.toFixed(2)}` : walletLoading ? "…" : "—";
   
   const activeCount = subscriptions.filter((s) => s.status === "active").length;
   const flaggedCount = alerts.filter((a) => !a.read).length;
@@ -58,7 +59,7 @@ export default function HomePage() {
             <Wallet size={16} color="#14ed9e" />
             <Text style={styles.walletBalanceLabel}>WALLET BALANCE</Text>
           </View>
-          <Text style={styles.walletBalanceValue}>${walletBalance.toFixed(2)}</Text>
+          <Text style={styles.walletBalanceValue}>{walletBalanceText}</Text>
         </TouchableOpacity>
       </Animated.View>
 

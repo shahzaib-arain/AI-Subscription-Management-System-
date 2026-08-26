@@ -110,6 +110,56 @@ async function request<T>(
   return json as ApiResponse<T>;
 }
 
+export interface WalletData {
+  id: number;
+  balance: number;
+  currency: string;
+  frozen: boolean;
+  updatedAt: string;
+}
+
+export interface WalletTransactionData {
+  id: number;
+  type: string;
+  amount: number;
+  balanceAfter: number;
+  description: string;
+  createdAt: string;
+}
+
+/**
+ * Same request() core as every other call — this just attaches the bearer
+ * token, so authenticated endpoints don't need their own fetch logic.
+ */
+async function authorizedRequest<T>(
+  endpoint: string,
+  token: string,
+  options: RequestInit = {}
+): Promise<ApiResponse<T>> {
+  const headers = new Headers(options.headers || {});
+  headers.set("Authorization", `Bearer ${token}`);
+  return request<T>(endpoint, { ...options, headers });
+}
+
+export const walletApi = {
+  getWallet: (token: string) => authorizedRequest<WalletData>("/wallet", token),
+
+  deposit: (token: string, amount: number) =>
+    authorizedRequest<WalletData>("/wallet/deposit", token, {
+      method: "POST",
+      body: JSON.stringify({ amount }),
+    }),
+
+  freeze: (token: string) =>
+    authorizedRequest<WalletData>("/wallet/freeze", token, { method: "POST" }),
+
+  unfreeze: (token: string) =>
+    authorizedRequest<WalletData>("/wallet/unfreeze", token, { method: "POST" }),
+
+  getTransactions: (token: string) =>
+    authorizedRequest<WalletTransactionData[]>("/wallet/transactions", token),
+};
+
 export const authApi = {
   signUp: (params: SignUpParams) => 
     request<AuthResponseData>("/auth/signup", {

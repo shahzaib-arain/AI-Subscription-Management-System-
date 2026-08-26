@@ -1,24 +1,33 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { Platform } from "react-native";
-import { 
-  authApi, 
-  SignUpParams, 
-  SignInParams, 
-  UserInfo, 
-  ForgotPasswordParams, 
-  ResetPasswordParams 
+import {
+  authApi,
+  walletApi,
+  SignUpParams,
+  SignInParams,
+  UserInfo,
+  ForgotPasswordParams,
+  ResetPasswordParams,
+  WalletData,
+  WalletTransactionData,
 } from "../services/api";
 
 interface AuthContextType {
   user: UserInfo | null;
   token: string | null;
-  walletBalance: number;
   loading: boolean;
   error: string | null;
+  wallet: WalletData | null;
+  walletTransactions: WalletTransactionData[];
+  walletLoading: boolean;
+  walletError: string | null;
   login: (params: SignInParams) => Promise<void>;
   register: (params: SignUpParams) => Promise<void>;
   logout: () => Promise<void>;
+  refreshWallet: () => Promise<void>;
   deposit: (amount: number) => Promise<void>;
+  freezeWallet: () => Promise<void>;
+  unfreezeWallet: () => Promise<void>;
   clearError: () => void;
   forgotPassword: (params: ForgotPasswordParams) => Promise<void>;
   resetPassword: (params: ResetPasswordParams) => Promise<void>;
@@ -62,9 +71,33 @@ const safeStorage = {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  const [walletBalance, setWalletBalance] = useState<number>(500.00); // Default balance
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [walletTransactions, setWalletTransactions] = useState<WalletTransactionData[]>([]);
+  const [walletLoading, setWalletLoading] = useState<boolean>(false);
+  const [walletError, setWalletError] = useState<string | null>(null);
+
+  // The single place wallet state is ever fetched from the server — called
+  // right after login/register and again on cold start, so it's always
+  // real backend data and never a value guessed at locally.
+  const loadWallet = async (activeToken: string) => {
+    setWalletLoading(true);
+    setWalletError(null);
+    try {
+      const [walletRes, transactionsRes] = await Promise.all([
+        walletApi.getWallet(activeToken),
+        walletApi.getTransactions(activeToken),
+      ]);
+      setWallet(walletRes.data);
+      setWalletTransactions(transactionsRes.data);
+    } catch (e: any) {
+      setWalletError(e.message || "Failed to load wallet.");
+    } finally {
+      setWalletLoading(false);
+    }
+  };
 
   // Load auth state from storage on startup
   useEffect(() => {
@@ -72,16 +105,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const storedToken = await safeStorage.getItem("np_token");
         const storedUser = await safeStorage.getItem("np_user");
-        const storedBalance = await safeStorage.getItem("np_balance");
 
         if (storedToken) {
           setToken(storedToken);
+          await loadWallet(storedToken);
         }
         if (storedUser) {
           setUser(JSON.parse(storedUser));
-        }
-        if (storedBalance) {
-          setWalletBalance(parseFloat(storedBalance));
         }
       } catch (e) {
         console.error("Failed to load auth state", e);
@@ -102,18 +132,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setToken(accessToken);
       setUser(userData);
-      
+
       await safeStorage.setItem("np_token", accessToken);
       await safeStorage.setItem("np_user", JSON.stringify(userData));
 
-      // Retrieve or initialize balance
-      const storedBalance = await safeStorage.getItem("np_balance");
-      if (!storedBalance) {
-        await safeStorage.setItem("np_balance", "500.00");
-        setWalletBalance(500.00);
-      } else {
-        setWalletBalance(parseFloat(storedBalance));
-      }
+      await loadWallet(accessToken);
     } catch (e: any) {
       setError(e.message || "Failed to sign in. Please try again.");
       throw e;
@@ -131,11 +154,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setToken(accessToken);
       setUser(userData);
-      setWalletBalance(500.00); // Initialize new user balance
 
       await safeStorage.setItem("np_token", accessToken);
       await safeStorage.setItem("np_user", JSON.stringify(userData));
-      await safeStorage.setItem("np_balance", "500.00");
+
+      await loadWallet(accessToken);
     } catch (e: any) {
       setError(e.message || "Failed to create account. Please check inputs.");
       throw e;
@@ -149,6 +172,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setToken(null);
       setUser(null);
+      setWallet(null);
+      setWalletTransactions([]);
+      setWalletError(null);
       await safeStorage.removeItem("np_token");
       await safeStorage.removeItem("np_user");
     } catch (e) {
@@ -158,15 +184,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const refreshWallet = async () => {
+    if (!token) return;
+    await loadWallet(token);
+  };
+
   const deposit = async (amount: number) => {
-    if (isNaN(amount) || amount <= 0) return;
-    try {
-      const newBalance = walletBalance + amount;
-      setWalletBalance(newBalance);
-      await safeStorage.setItem("np_balance", newBalance.toFixed(2));
-    } catch (e) {
-      console.error("Failed to save deposited balance", e);
-    }
+    if (!token || isNaN(amount) || amount <= 0) return;
+    const response = await walletApi.deposit(token, amount);
+    setWallet(response.data);
+    // Only the transaction list is stale after a deposit — the wallet
+    // itself just came back in the response above, no need to re-fetch it.
+    const transactionsRes = await walletApi.getTransactions(token);
+    setWalletTransactions(transactionsRes.data);
+  };
+
+  const freezeWallet = async () => {
+    if (!token) return;
+    const response = await walletApi.freeze(token);
+    setWallet(response.data);
+  };
+
+  const unfreezeWallet = async () => {
+    if (!token) return;
+    const response = await walletApi.unfreeze(token);
+    setWallet(response.data);
   };
 
   const forgotPassword = async (params: ForgotPasswordParams) => {
@@ -196,13 +238,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         user,
         token,
-        walletBalance,
         loading,
         error,
+        wallet,
+        walletTransactions,
+        walletLoading,
+        walletError,
         login,
         register,
         logout,
+        refreshWallet,
         deposit,
+        freezeWallet,
+        unfreezeWallet,
         clearError,
         forgotPassword,
         resetPassword,

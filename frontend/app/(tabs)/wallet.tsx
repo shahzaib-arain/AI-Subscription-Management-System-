@@ -1,38 +1,81 @@
 import React, { useState, useEffect } from "react";
-import { 
-  ScrollView, 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  Modal, 
-  TextInput, 
+import {
+  ScrollView,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  TextInput,
   ActivityIndicator,
-  Platform
+  RefreshControl,
 } from "react-native";
-import Animated, { FadeInUp, FadeInDown } from "react-native-reanimated";
-import { 
-  Plus, 
-  Lock, 
-  Unlock, 
-  Eye, 
-  EyeOff, 
-  TrendingUp, 
-  TrendingDown, 
-  ArrowUpRight 
+import Animated, { FadeInUp, FadeInDown, FadeOutUp } from "react-native-reanimated";
+import {
+  Plus,
+  Lock,
+  Unlock,
+  Eye,
+  EyeOff,
+  TrendingUp,
+  TrendingDown,
+  ArrowUpRight,
 } from "lucide-react-native";
 import { useAuth } from "../../context/AuthContext";
 import CreditCard from "../../components/ui/CreditCard";
-import { activities } from "../../constants/mockData";
+import { useAutoDismiss } from "../../hooks/use-auto-dismiss";
+import { WalletTransactionData } from "../../services/api";
+
+// Ledger entry types that add money read as "in" (green, up-arrow); every
+// other type reads as "out" (red, down-arrow) — one rule, reused for both
+// the icon and the amount's sign/color instead of a switch per concern.
+const INFLOW_TYPES = new Set(["DEPOSIT", "REFUND"]);
+
+function isInflow(type: string) {
+  return INFLOW_TYPES.has(type);
+}
+
+function formatTransactionTimestamp(iso: string): string {
+  const date = new Date(iso);
+  const now = new Date();
+  const isToday = date.toDateString() === now.toDateString();
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.toDateString() === yesterday.toDateString();
+
+  const time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  if (isToday) return `Today, ${time}`;
+  if (isYesterday) return `Yesterday, ${time}`;
+  return `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+}
+
+function describeTransaction(item: WalletTransactionData): string {
+  if (item.description) return item.description;
+  return item.type.charAt(0) + item.type.slice(1).toLowerCase();
+}
 
 export default function WalletPage() {
-  const { user, walletBalance, deposit } = useAuth();
-  
+  const {
+    user,
+    wallet,
+    walletLoading,
+    walletError,
+    walletTransactions,
+    deposit,
+    freezeWallet,
+    unfreezeWallet,
+    refreshWallet,
+  } = useAuth();
+
   const [expiry, setExpiry] = useState("12/31");
   const [focusedField, setFocusedField] = useState<"number" | "name" | "expiry" | "cvv" | null>(null);
-  const [isFrozen, setIsFrozen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-  
+  const [refreshing, setRefreshing] = useState(false);
+
+  const [isTogglingFreeze, setIsTogglingFreeze] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  useAutoDismiss(actionError, () => setActionError(null));
+
   // Deposit Modal State
   const [depositModalVisible, setDepositModalVisible] = useState(false);
   const [depositAmount, setDepositAmount] = useState("");
@@ -49,8 +92,27 @@ export default function WalletPage() {
   const cardNumber = user?.virtualCardNumber || "••••••••••••••••";
   const cardholderName = user?.fullName || "Your Name";
 
-  const toggleFreeze = () => {
-    setIsFrozen(prev => !prev);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refreshWallet();
+    setRefreshing(false);
+  };
+
+  const toggleFreeze = async () => {
+    if (!wallet || isTogglingFreeze) return;
+    setActionError(null);
+    setIsTogglingFreeze(true);
+    try {
+      if (wallet.frozen) {
+        await unfreezeWallet();
+      } else {
+        await freezeWallet();
+      }
+    } catch (err: any) {
+      setActionError(err?.message || "Couldn't update your card right now. Please try again.");
+    } finally {
+      setIsTogglingFreeze(false);
+    }
   };
 
   const handleDeposit = async () => {
@@ -62,26 +124,67 @@ export default function WalletPage() {
     }
 
     setIsDepositing(true);
-    // Simulate a brief network latency for premium feel
-    setTimeout(async () => {
+    try {
       await deposit(amount);
-      setIsDepositing(false);
       setDepositAmount("");
       setDepositModalVisible(false);
-    }, 800);
+    } catch (err: any) {
+      setDepositError(err?.message || "Deposit failed. Please try again.");
+    } finally {
+      setIsDepositing(false);
+    }
   };
 
+  // First load, nothing to show yet — a spinner beats a flash of $0.00.
+  if (walletLoading && !wallet) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator color="#14ed9e" size="large" />
+      </View>
+    );
+  }
+
+  // Load failed before we ever had data — give a real retry, not a stuck screen.
+  if (walletError && !wallet) {
+    return (
+      <View style={[styles.container, styles.centerContent, styles.errorState]}>
+        <Text style={styles.errorStateText}>{walletError}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refreshWallet}>
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (!wallet) {
+    return null;
+  }
+
+  const isFrozen = wallet.frozen;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#14ed9e" />
+      }
+    >
       <Animated.View entering={FadeInUp.duration(400)} style={styles.header}>
         <Text style={styles.title}>Your Wallet</Text>
         <Text style={styles.subtitle}>Fund subscriptions securely via your virtual card</Text>
       </Animated.View>
 
+      {actionError && (
+        <Animated.View entering={FadeInDown.duration(200)} exiting={FadeOutUp.duration(200)} style={styles.actionErrorBanner}>
+          <Text style={styles.actionErrorText}>{actionError}</Text>
+        </Animated.View>
+      )}
+
       {/* Balance display */}
       <Animated.View entering={FadeInUp.duration(400).delay(100)} style={styles.balanceCard}>
         <Text style={styles.balanceLabel}>AVAILABLE BALANCE</Text>
-        <Text style={styles.balanceAmount}>${walletBalance.toFixed(2)}</Text>
+        <Text style={styles.balanceAmount}>${wallet.balance.toFixed(2)}</Text>
         <View style={styles.badge}>
           <View style={[styles.dot, { backgroundColor: isFrozen ? "#ff4e83" : "#14ed9e" }]} />
           <Text style={styles.badgeText}>{isFrozen ? "Card Frozen" : "Card Active"}</Text>
@@ -91,15 +194,15 @@ export default function WalletPage() {
       {/* Virtual Card Visualization */}
       <Animated.View entering={FadeInUp.duration(400).delay(150)} style={styles.cardContainer}>
         <View style={[styles.cardInner, isFrozen && styles.frozenOverlay]}>
-          <CreditCard 
-            number={cardNumber.replace(/\s+/g, "")} 
-            name={cardholderName} 
-            expiry={expiry} 
-            cvv="819" 
-            focused={focusedField} 
+          <CreditCard
+            number={cardNumber.replace(/\s+/g, "")}
+            name={cardholderName}
+            expiry={expiry}
+            cvv="819"
+            focused={focusedField}
           />
         </View>
-        
+
         {isFrozen && (
           <View style={styles.frozenBadgeContainer}>
             <Lock size={16} color="#0d0e12" strokeWidth={3} />
@@ -110,8 +213,8 @@ export default function WalletPage() {
 
       {/* Quick Action Buttons */}
       <Animated.View entering={FadeInUp.duration(400).delay(200)} style={styles.actionsRow}>
-        <TouchableOpacity 
-          style={styles.actionBtn} 
+        <TouchableOpacity
+          style={styles.actionBtn}
           onPress={() => setDepositModalVisible(true)}
         >
           <View style={[styles.actionIconBox, { backgroundColor: "rgba(20, 237, 158, 0.1)" }]}>
@@ -120,12 +223,15 @@ export default function WalletPage() {
           <Text style={styles.actionText}>Add Funds</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.actionBtn} 
+        <TouchableOpacity
+          style={styles.actionBtn}
           onPress={toggleFreeze}
+          disabled={isTogglingFreeze}
         >
           <View style={[styles.actionIconBox, { backgroundColor: isFrozen ? "rgba(20, 237, 158, 0.1)" : "rgba(255, 78, 131, 0.1)" }]}>
-            {isFrozen ? (
+            {isTogglingFreeze ? (
+              <ActivityIndicator size="small" color={isFrozen ? "#14ed9e" : "#ff4e83"} />
+            ) : isFrozen ? (
               <Unlock size={20} color="#14ed9e" />
             ) : (
               <Lock size={20} color="#ff4e83" />
@@ -134,8 +240,8 @@ export default function WalletPage() {
           <Text style={styles.actionText}>{isFrozen ? "Unfreeze" : "Freeze Card"}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={styles.actionBtn} 
+        <TouchableOpacity
+          style={styles.actionBtn}
           onPress={() => setShowDetails(prev => !prev)}
         >
           <View style={[styles.actionIconBox, { backgroundColor: "rgba(78, 131, 255, 0.1)" }]}>
@@ -177,24 +283,35 @@ export default function WalletPage() {
       {/* Transaction list */}
       <Animated.View entering={FadeInUp.duration(400).delay(250)} style={styles.transactionsSection}>
         <Text style={styles.sectionTitle}>Recent Transactions</Text>
-        <View style={styles.list}>
-          {activities.map((item, i) => (
-            <View key={item.id} style={styles.transactionCard}>
-              <View style={styles.flexRow}>
-                <View style={styles.iconBox}>
-                  <Text style={{ fontSize: 20 }}>{item.icon}</Text>
+        {walletTransactions.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No transactions yet.</Text>
+          </View>
+        ) : (
+          <View style={styles.list}>
+            {walletTransactions.map((item) => {
+              const inflow = isInflow(item.type);
+              const Icon = inflow ? TrendingUp : TrendingDown;
+              const color = inflow ? "#14ed9e" : "#ff4e83";
+              return (
+                <View key={item.id} style={styles.transactionCard}>
+                  <View style={styles.flexRow}>
+                    <View style={[styles.iconBox, { backgroundColor: `${color}1A` }]}>
+                      <Icon size={18} color={color} />
+                    </View>
+                    <View>
+                      <Text style={styles.itemTitle}>{describeTransaction(item)}</Text>
+                      <Text style={styles.itemDate}>{formatTransactionTimestamp(item.createdAt)}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.amount, { color }]}>
+                    {inflow ? "+" : "-"}${item.amount.toFixed(2)}
+                  </Text>
                 </View>
-                <View>
-                  <Text style={styles.itemTitle}>{item.title}</Text>
-                  <Text style={styles.itemDate}>{item.timestamp}</Text>
-                </View>
-              </View>
-              {item.amount && (
-                <Text style={styles.amount}>-${item.amount.toFixed(2)}</Text>
-              )}
-            </View>
-          ))}
-        </View>
+              );
+            })}
+          </View>
+        )}
       </Animated.View>
 
       {/* Add Funds Modal */}
@@ -209,7 +326,7 @@ export default function WalletPage() {
             <View style={styles.modalIndicator} />
             <Text style={styles.modalTitle}>Deposit Funds</Text>
             <Text style={styles.modalSubtitle}>Load money onto your virtual card instantly</Text>
-            
+
             {depositError && (
               <View style={styles.modalError}>
                 <Text style={styles.modalErrorText}>{depositError}</Text>
@@ -243,8 +360,8 @@ export default function WalletPage() {
               ))}
             </View>
 
-            <TouchableOpacity 
-              style={styles.modalCta} 
+            <TouchableOpacity
+              style={styles.modalCta}
               onPress={handleDeposit}
               disabled={isDepositing}
             >
@@ -258,8 +375,8 @@ export default function WalletPage() {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={styles.modalCancel} 
+            <TouchableOpacity
+              style={styles.modalCancel}
               onPress={() => {
                 setDepositAmount("");
                 setDepositError(null);
@@ -279,9 +396,29 @@ export default function WalletPage() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0d0e12" },
   scrollContent: { paddingHorizontal: 20, paddingTop: 64, paddingBottom: 100 },
+  centerContent: { justifyContent: "center", alignItems: "center" },
+  errorState: { paddingHorizontal: 32, gap: 16 },
+  errorStateText: { color: "#7e828d", fontSize: 14, textAlign: "center", fontFamily: "Manrope_500Medium" },
+  retryButton: { backgroundColor: "#14ed9e", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
+  retryButtonText: { color: "#0d0e12", fontSize: 14, fontFamily: "Manrope_700Bold" },
   header: { marginBottom: 20 },
   title: { fontSize: 28, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_800ExtraBold" },
   subtitle: { color: "#7e828d", fontSize: 13, marginTop: 4, fontFamily: "Manrope_400Regular" },
+
+  actionErrorBanner: {
+    backgroundColor: "rgba(245, 34, 34, 0.15)",
+    borderWidth: 1,
+    borderColor: "#f52222",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+  actionErrorText: {
+    color: "#ff4e83",
+    fontSize: 13,
+    fontFamily: "Manrope_500Medium",
+    textAlign: "center",
+  },
 
   balanceCard: {
     backgroundColor: "#15161d",
@@ -420,6 +557,17 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_700Bold",
     marginBottom: 16,
   },
+  emptyState: {
+    backgroundColor: "rgba(35, 36, 47, 0.6)",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+  },
+  emptyStateText: {
+    color: "#7e828d",
+    fontSize: 13,
+    fontFamily: "Manrope_400Regular",
+  },
   list: { gap: 12 },
   transactionCard: {
     backgroundColor: "rgba(35, 36, 47, 0.6)",
@@ -434,7 +582,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#23242f",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -450,7 +597,6 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_400Regular",
   },
   amount: {
-    color: "#fcfcfc",
     fontSize: 14,
     fontFamily: "Manrope_700Bold",
   },
