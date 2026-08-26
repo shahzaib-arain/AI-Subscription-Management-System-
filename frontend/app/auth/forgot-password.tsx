@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { Mail, ArrowRight, ArrowLeft } from "lucide-react-native";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import { Mail, ArrowRight, ArrowLeft, CheckCircle2 } from "lucide-react-native";
 
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
 import { authApi } from "../../services/api";
+import { isValidEmail } from "../../utils/validation";
+import { useAutoDismiss } from "../../hooks/use-auto-dismiss";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -14,12 +17,26 @@ export default function ForgotPasswordPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // The error clears itself after a few seconds instead of sitting on
+  // screen indefinitely. The success message stays — it's actionable
+  // information ("check your inbox"), not a transient mistake.
+  useAutoDismiss(errorMessage, () => setErrorMessage(null));
+
+  // Live feedback as the user types.
+  const liveEmailError = email.length > 0 && !isValidEmail(email) ? "Enter a valid email address." : null;
+  const isEmailValid = email.length > 0 && !liveEmailError;
+
   const handleReset = async () => {
     setSuccessMessage(null);
     setErrorMessage(null);
 
     if (!email.trim()) {
       setErrorMessage("Please enter your email address.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setErrorMessage("Enter a valid email address.");
       return;
     }
 
@@ -56,8 +73,8 @@ export default function ForgotPasswordPage() {
         </View>
 
         <View style={styles.inputGroup}>
-          <View style={[styles.inputWrapper, focused && styles.inputWrapperFocused]}>
-            <Mail size={20} color={focused ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+          <View style={[styles.inputWrapper, focused && styles.inputWrapperFocused, liveEmailError && styles.inputWrapperError]}>
+            <Mail size={20} color={liveEmailError ? "#f52222" : focused ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Email address"
               placeholderTextColor="#7e828d"
@@ -73,13 +90,15 @@ export default function ForgotPasswordPage() {
               importantForAutofill="no"
               blurOnSubmit={false}
             />
+            {isEmailValid && <CheckCircle2 size={18} color="#14ed9e" />}
           </View>
+          {liveEmailError && <Text style={styles.fieldErrorText}>{liveEmailError}</Text>}
         </View>
 
         {errorMessage ? (
-          <View style={styles.errorAlert}>
+          <Animated.View entering={FadeInDown.duration(200)} exiting={FadeOutUp.duration(200)} style={styles.errorAlert}>
             <Text style={styles.errorAlertText}>{errorMessage}</Text>
-          </View>
+          </Animated.View>
         ) : null}
 
         {successMessage ? (
@@ -123,6 +142,7 @@ const styles = StyleSheet.create({
   inputGroup: { gap: 16 },
   inputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#23242f", borderRadius: 12, borderWidth: 1, borderColor: "#24252e", paddingHorizontal: 16, height: 56 },
   inputWrapperFocused: { borderColor: "#14ed9e", shadowColor: "#14ed9e", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 },
+  inputWrapperError: { borderColor: "#f52222" },
   inputIcon: { marginRight: 12 },
   input: { 
     flex: 1, 
@@ -151,6 +171,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "Manrope_500Medium",
     textAlign: "center",
+  },
+  fieldErrorText: {
+    color: "#f52222",
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    marginTop: 6,
+    marginLeft: 4,
   },
   successAlert: {
     backgroundColor: "rgba(20, 237, 158, 0.16)",

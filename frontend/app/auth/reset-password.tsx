@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
-import { Lock, ArrowLeft, ArrowRight } from "lucide-react-native";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import { Lock, ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react-native";
 
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+import PasswordStrengthMeter from "../../components/ui/PasswordStrengthMeter";
 import { authApi } from "../../services/api";
+import { MIN_PASSWORD_LENGTH } from "../../utils/validation";
+import { useAutoDismiss } from "../../hooks/use-auto-dismiss";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -15,6 +19,15 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // The error clears itself after a few seconds instead of sitting on screen
+  // indefinitely. The success message stays until the redirect fires.
+  useAutoDismiss(error, () => setError(null));
+
+  // Live feedback as the user types — no need to wait for submit to find out.
+  const confirmError =
+    confirmPassword.length > 0 && confirmPassword !== password ? "Passwords do not match." : null;
+  const isConfirmValid = confirmPassword.length > 0 && !confirmError;
 
   const handleReset = async () => {
     setMessage(null);
@@ -30,13 +43,13 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
 
@@ -55,7 +68,7 @@ export default function ResetPasswordPage() {
   return (
     <KeyboardAvoidingWrapper contentContainerStyle={styles.container}>
       <View style={styles.formContainer}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.push("/auth/login")}> 
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push("/auth/login")}>
           <ArrowLeft size={16} color="#7e828d" />
           <Text style={styles.backText}>Back to Login</Text>
         </TouchableOpacity>
@@ -86,9 +99,9 @@ export default function ResetPasswordPage() {
         ) : (
           <>
             {error ? (
-              <View style={styles.errorAlert}>
+              <Animated.View entering={FadeInDown.duration(200)} exiting={FadeOutUp.duration(200)} style={styles.errorAlert}>
                 <Text style={styles.errorAlertText}>{error}</Text>
-              </View>
+              </Animated.View>
             ) : null}
 
             {message ? (
@@ -98,37 +111,51 @@ export default function ResetPasswordPage() {
             ) : null}
 
             <View style={styles.inputGroup}>
-              <View style={[styles.inputWrapper, focused === "password" && styles.inputWrapperFocused]}>
-                <Lock size={20} color={focused === "password" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-                <TextInput
-                  placeholder="New password"
-                  placeholderTextColor="#7e828d"
-                  value={password}
-                  onChangeText={setPassword}
-                  style={styles.input}
-                  secureTextEntry
-                  onFocus={() => setFocused("password")}
-                  onBlur={() => setFocused(null)}
-                  selectionColor="#14ed9e"
-                  autoComplete="off"
-                  importantForAutofill="no"
-                />
+              <View style={styles.fieldBlock}>
+                <View style={[styles.inputWrapper, focused === "password" && styles.inputWrapperFocused]}>
+                  <Lock size={20} color={focused === "password" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+                  <TextInput
+                    placeholder="New password"
+                    placeholderTextColor="#7e828d"
+                    value={password}
+                    onChangeText={setPassword}
+                    style={styles.input}
+                    secureTextEntry
+                    onFocus={() => setFocused("password")}
+                    onBlur={() => setFocused(null)}
+                    selectionColor="#14ed9e"
+                    autoComplete="off"
+                    importantForAutofill="no"
+                  />
+                </View>
+                <PasswordStrengthMeter password={password} />
               </View>
-              <View style={[styles.inputWrapper, focused === "confirm" && styles.inputWrapperFocused]}>
-                <Lock size={20} color={focused === "confirm" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-                <TextInput
-                  placeholder="Confirm password"
-                  placeholderTextColor="#7e828d"
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  style={styles.input}
-                  secureTextEntry
-                  onFocus={() => setFocused("confirm")}
-                  onBlur={() => setFocused(null)}
-                  selectionColor="#14ed9e"
-                  autoComplete="off"
-                  importantForAutofill="no"
-                />
+
+              <View style={styles.fieldBlock}>
+                <View
+                  style={[
+                    styles.inputWrapper,
+                    focused === "confirm" && styles.inputWrapperFocused,
+                    confirmError && styles.inputWrapperError,
+                  ]}
+                >
+                  <Lock size={20} color={confirmError ? "#f52222" : focused === "confirm" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+                  <TextInput
+                    placeholder="Confirm password"
+                    placeholderTextColor="#7e828d"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    style={styles.input}
+                    secureTextEntry
+                    onFocus={() => setFocused("confirm")}
+                    onBlur={() => setFocused(null)}
+                    selectionColor="#14ed9e"
+                    autoComplete="off"
+                    importantForAutofill="no"
+                  />
+                  {isConfirmValid && <CheckCircle2 size={18} color="#14ed9e" />}
+                </View>
+                {confirmError && <Text style={styles.fieldErrorText}>{confirmError}</Text>}
               </View>
             </View>
 
@@ -166,8 +193,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_700Bold" },
   subtitle: { fontSize: 14, color: "#7e828d", marginTop: 8, lineHeight: 22, textAlign: "center", fontFamily: "Manrope_400Regular" },
   inputGroup: { gap: 16 },
+  fieldBlock: { gap: 0 },
   inputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#23242f", borderRadius: 12, borderWidth: 1, borderColor: "#24252e", paddingHorizontal: 16, height: 56 },
   inputWrapperFocused: { borderColor: "#14ed9e", shadowColor: "#14ed9e", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 },
+  inputWrapperError: { borderColor: "#f52222" },
   inputIcon: { marginRight: 12 },
   input: {
     flex: 1,
@@ -179,6 +208,13 @@ const styles = StyleSheet.create({
     outlineStyle: "none",
     borderWidth: 0,
     fontFamily: "Manrope_400Regular",
+  },
+  fieldErrorText: {
+    color: "#f52222",
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    marginTop: 6,
+    marginLeft: 4,
   },
   submitButton: { backgroundColor: "#14ed9e", height: 56, borderRadius: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 24, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 10 },
   submitText: { color: "#0d0e12", fontSize: 16, fontWeight: "600", fontFamily: "Manrope_700Bold" },

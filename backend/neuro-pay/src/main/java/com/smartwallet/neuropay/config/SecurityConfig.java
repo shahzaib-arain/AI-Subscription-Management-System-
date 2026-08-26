@@ -1,10 +1,14 @@
 package com.smartwallet.neuropay.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartwallet.neuropay.dto.response.ApiResponse;
 import com.smartwallet.neuropay.security.JwtAuthFilter;
 import com.smartwallet.neuropay.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -19,6 +23,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -27,6 +33,7 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsServiceImpl userDetailsService;
+    private final ObjectMapper objectMapper;
 
     private static final String[] PUBLIC_ENDPOINTS = {
             "/auth/**",
@@ -45,9 +52,26 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .exceptionHandling(exceptions -> exceptions
+                        // No/invalid token on a protected endpoint — without this, Spring
+                        // Security returns a blank 401/403 instead of the app's JSON shape.
+                        .authenticationEntryPoint((request, response, authException) ->
+                                writeJsonError(response, HttpStatus.UNAUTHORIZED,
+                                        "Authentication is required to access this resource."))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                writeJsonError(response, HttpStatus.FORBIDDEN,
+                                        "You don't have permission to perform this action."))
+                )
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
+    }
+
+    private void writeJsonError(jakarta.servlet.http.HttpServletResponse response, HttpStatus status, String message)
+            throws IOException {
+        response.setStatus(status.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(objectMapper.writeValueAsString(ApiResponse.error(message)));
     }
 
     @Bean

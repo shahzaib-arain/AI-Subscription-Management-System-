@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, Link } from "expo-router";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { Mail, Lock, ArrowRight } from "lucide-react-native";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import { Mail, Lock, ArrowRight, CheckCircle2 } from "lucide-react-native";
 import { useAuth } from "../../context/AuthContext";
 
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+import { isValidEmail } from "../../utils/validation";
+import { useAutoDismiss } from "../../hooks/use-auto-dismiss";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -17,12 +19,33 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // A failed attempt on another screen (e.g. Login) leaves its error sitting
+  // in shared AuthContext state — clear it the moment this screen opens so
+  // it doesn't appear to belong to this screen.
+  useEffect(() => {
+    clearError();
+  }, []);
+
+  // Every error here — local validation or the API's — clears itself after
+  // a few seconds instead of sitting on screen indefinitely.
+  useAutoDismiss(validationError, () => setValidationError(null));
+  useAutoDismiss(apiError, clearError);
+
+  // Live feedback as the user types, instead of only after pressing "Sign In".
+  const emailError = email.length > 0 && !isValidEmail(email) ? "Enter a valid email address." : null;
+  const isEmailValid = email.length > 0 && !emailError;
+
   const handleSignIn = async () => {
     setValidationError(null);
     clearError();
 
     if (!email.trim() || !password) {
       setValidationError("Please enter your email and password.");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setValidationError("Enter a valid email address.");
       return;
     }
 
@@ -54,29 +77,33 @@ export default function SignInPage() {
         </View>
 
         {displayError && (
-          <View style={styles.errorAlert}>
+          <Animated.View entering={FadeInDown.duration(200)} exiting={FadeOutUp.duration(200)} style={styles.errorAlert}>
             <Text style={styles.errorAlertText}>{displayError}</Text>
-          </View>
+          </Animated.View>
         )}
 
         <View style={styles.inputGroup}>
-          <View style={styles.inputWrapper}>
-            <Mail size={20} color={focused === "email" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-            <TextInput
-              placeholder="Email address"
-              placeholderTextColor="#7e828d"
-              value={email}
-              onChangeText={setEmail}
-              style={styles.input}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
-              selectionColor="#14ed9e"
-              autoComplete="off"
-              importantForAutofill="no"
-              blurOnSubmit={false}
-            />
+          <View style={styles.fieldBlock}>
+            <View style={[styles.inputWrapper, emailError && styles.inputWrapperError]}>
+              <Mail size={20} color={emailError ? "#f52222" : focused === "email" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+              <TextInput
+                placeholder="Email address"
+                placeholderTextColor="#7e828d"
+                value={email}
+                onChangeText={setEmail}
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onFocus={() => setFocused("email")}
+                onBlur={() => setFocused(null)}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+              />
+              {isEmailValid && <CheckCircle2 size={18} color="#14ed9e" />}
+            </View>
+            {emailError && <Text style={styles.fieldErrorText}>{emailError}</Text>}
           </View>
           <View style={styles.inputWrapper}>
             <Lock size={20} color={focused === "password" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
@@ -147,8 +174,10 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_700Bold" },
   subtitle: { fontSize: 14, color: "#7e828d", marginTop: 8, fontFamily: "Manrope_400Regular" },
   inputGroup: { gap: 16 },
+  fieldBlock: { gap: 0 },
   inputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#23242f", borderRadius: 12, borderWidth: 1, borderColor: "#24252e", paddingHorizontal: 16, height: 56 },
   inputWrapperFocused: { borderColor: "#14ed9e", shadowColor: "#14ed9e", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 },
+  inputWrapperError: { borderColor: "#f52222" },
   inputIcon: { marginRight: 12 },
   input: { 
     flex: 1, 
@@ -160,6 +189,13 @@ const styles = StyleSheet.create({
     outlineStyle: 'none',
     borderWidth: 0,
     fontFamily: "Manrope_400Regular"
+  },
+  fieldErrorText: {
+    color: "#f52222",
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    marginTop: 6,
+    marginLeft: 4,
   },
   forgotWrapper: { alignItems: "flex-end", marginTop: 12, marginBottom: 24 },
   forgotText: { color: "#14ed9e", fontSize: 12, fontWeight: "600", fontFamily: "Manrope_600SemiBold" },

@@ -1,0 +1,674 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<title>NeuroPay Progress Report</title>
+
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#F3F5F5; --surface:#FFFFFF; --surface-alt:#E8EDEC; --surface-raised:#FFFFFF;
+    --ink:#14181B; --ink-2:#465055; --ink-3:#7A8286;
+    --border:rgba(20,24,27,0.12); --border-strong:rgba(20,24,27,0.22);
+    --accent:#1B5E56; --accent-strong:#0F3F3A; --accent-soft:#E1EDEA; --accent-ink:#0F3F3A;
+    --good:#0ca30c; --warn:#fab219; --bad:#d03b3b;
+    --chip-backend:#2a78d6; --chip-ai:#eb6834; --chip-frontend:#1baf7a; --chip-integ:#eda100;
+    --feas-1:#6da7ec; --feas-2:#2a78d6; --feas-3:#184f95; --feas-4:#0d366b;
+    --shadow: 0 1px 2px rgba(20,24,27,0.06), 0 8px 24px rgba(20,24,27,0.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --bg:#0D1113; --surface:#161C1F; --surface-alt:#1E262A; --surface-raised:#1B2226;
+      --ink:#F1F5F4; --ink-2:#B7C2C0; --ink-3:#83908E;
+      --border:rgba(255,255,255,0.12); --border-strong:rgba(255,255,255,0.22);
+      --accent:#54C8B5; --accent-strong:#8AD9CB; --accent-soft:rgba(84,200,181,0.14); --accent-ink:#8AD9CB;
+      --good:#0ca30c; --warn:#fab219; --bad:#d03b3b;
+      --chip-backend:#3987e5; --chip-ai:#d95926; --chip-frontend:#199e70; --chip-integ:#c98500;
+      --feas-1:#5598e7; --feas-2:#3987e5; --feas-3:#1c5cab; --feas-4:#184f95;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#0D1113; --surface:#161C1F; --surface-alt:#1E262A; --surface-raised:#1B2226;
+    --ink:#F1F5F4; --ink-2:#B7C2C0; --ink-3:#83908E;
+    --border:rgba(255,255,255,0.12); --border-strong:rgba(255,255,255,0.22);
+    --accent:#54C8B5; --accent-strong:#8AD9CB; --accent-soft:rgba(84,200,181,0.14); --accent-ink:#8AD9CB;
+    --good:#0ca30c; --warn:#fab219; --bad:#d03b3b;
+    --chip-backend:#3987e5; --chip-ai:#d95926; --chip-frontend:#199e70; --chip-integ:#c98500;
+    --feas-1:#5598e7; --feas-2:#3987e5; --feas-3:#1c5cab; --feas-4:#184f95;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent-soft); }
+  h1,h2,h3,h4{ font-family:'Source Serif 4', Georgia, 'Times New Roman', serif; font-weight:700; color:var(--ink); text-wrap:balance; margin:0; }
+  a{ color:var(--accent); text-decoration-color:var(--border-strong); text-underline-offset:3px; }
+  a:hover{ text-decoration-color:currentColor; }
+  code, .mono{ font-family:'IBM Plex Mono', 'SF Mono', Consolas, monospace; }
+  .tabular{ font-variant-numeric:tabular-nums; }
+  p{ margin:0 0 1em; color:var(--ink-2); max-width:68ch; }
+  p:last-child{ margin-bottom:0; }
+  ul,ol{ margin:0 0 1em; padding-left:1.25em; color:var(--ink-2); }
+  li{ margin-bottom:.4em; }
+  li:last-child{ margin-bottom:0; }
+  li::marker{ color:var(--ink-3); }
+  strong{ color:var(--ink); font-weight:600; }
+  code.inline{ background:var(--surface-alt); border:1px solid var(--border); border-radius:4px; padding:.1em .4em; font-size:.85em; color:var(--accent-ink); }
+
+  a:focus-visible, button:focus-visible, .navlink:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:2px; }
+
+  /* ---------- shell ---------- */
+  .shell{ max-width:1200px; margin:0 auto; padding:0 28px; display:grid; grid-template-columns:248px minmax(0,1fr); gap:56px; align-items:start; }
+  @media (max-width:1040px){ .shell{ grid-template-columns:1fr; } .side{ display:none; } }
+
+  .side{ position:sticky; top:32px; padding-top:56px; max-height:calc(100vh - 64px); overflow-y:auto; }
+  .side-kicker{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); font-weight:600; margin-bottom:12px; }
+  .side nav{ display:flex; flex-direction:column; gap:2px; border-left:1px solid var(--border); }
+  .side nav a{ color:var(--ink-2); text-decoration:none; font-size:13.5px; padding:6px 0 6px 16px; border-left:2px solid transparent; margin-left:-1px; transition:color .15s, border-color .15s; }
+  .side nav a:hover{ color:var(--ink); }
+  .side nav a.active{ color:var(--accent-ink); border-left-color:var(--accent); font-weight:600; }
+
+  main{ min-width:0; padding-top:56px; padding-bottom:120px; }
+
+  /* ---------- cover ---------- */
+  .cover{ padding-bottom:40px; margin-bottom:48px; border-bottom:1px solid var(--border); }
+  .cover-kicker{ display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+  .badge{ display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; padding:5px 10px; border-radius:100px; border:1px solid var(--border-strong); color:var(--ink-2); }
+  .badge.accent{ color:var(--accent-ink); border-color:transparent; background:var(--accent-soft); }
+  .cover h1{ font-size:42px; line-height:1.08; margin-bottom:14px; letter-spacing:-.01em; }
+  .cover .dek{ font-size:18px; color:var(--ink-2); max-width:56ch; margin-bottom:28px; }
+  .cover-meta{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:20px 32px; max-width:760px; }
+  .cover-meta .k{ font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-3); margin-bottom:4px; }
+  .cover-meta .v{ font-size:14px; color:var(--ink); font-weight:500; }
+
+  /* ---------- sections ---------- */
+  section{ margin-bottom:72px; scroll-margin-top:24px; }
+  section:last-child{ margin-bottom:0; }
+  .eyebrow{ font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--accent-ink); margin-bottom:10px; }
+  h2{ font-size:27px; margin-bottom:6px; }
+  .section-intro{ font-size:15.5px; margin-top:14px; }
+  h3{ font-size:19px; margin:36px 0 12px; }
+  h3:first-of-type{ margin-top:28px; }
+  .lede{ font-size:17px; color:var(--ink-2); max-width:64ch; }
+
+  /* ---------- stat row ---------- */
+  .stat-row{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:28px 0; }
+  @media (max-width:760px){ .stat-row{ grid-template-columns:repeat(2,1fr); } }
+  .stat{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px 18px; }
+  .stat .n{ font-family:'Source Serif 4',serif; font-size:28px; font-weight:600; color:var(--ink); line-height:1.1; }
+  .stat .l{ font-size:12px; color:var(--ink-3); margin-top:6px; }
+
+  /* ---------- callout ---------- */
+  .callout{ display:flex; gap:14px; background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:8px; padding:18px 20px; margin:24px 0; }
+  .callout.risk{ border-left-color:var(--bad); }
+  .callout .ico{ font-size:18px; line-height:1.4; flex-shrink:0; }
+  .callout .body p{ margin-bottom:.5em; font-size:14.5px; }
+  .callout .body p:last-child{ margin-bottom:0; }
+  .callout .title{ font-weight:600; color:var(--ink); font-size:14.5px; margin-bottom:4px; }
+
+  /* ---------- tables ---------- */
+  .table-wrap{ overflow-x:auto; margin:20px 0; border:1px solid var(--border); border-radius:10px; background:var(--surface); box-shadow:var(--shadow); }
+  table{ border-collapse:collapse; width:100%; min-width:640px; font-size:13.5px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:600; padding:12px 16px; border-bottom:1px solid var(--border); white-space:nowrap; background:var(--surface-alt); }
+  td{ padding:13px 16px; border-bottom:1px solid var(--border); color:var(--ink-2); vertical-align:top; }
+  tr:last-child td{ border-bottom:none; }
+  td.name{ color:var(--ink); font-weight:600; }
+  td.evidence{ font-size:12.5px; }
+
+  /* ---------- status pill ---------- */
+  .pill{ display:inline-flex; align-items:center; gap:6px; white-space:nowrap; font-size:12.5px; font-weight:600; color:var(--ink); }
+  .dot{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .dot.good{ background:var(--good); }
+  .dot.warn{ background:var(--warn); }
+  .dot.bad{ background:var(--bad); }
+  .dot.neutral{ background:var(--ink-3); }
+
+  /* ---------- feasibility swatch ---------- */
+  .feas{ display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:600; color:var(--ink); white-space:nowrap; }
+  .sw{ width:10px; height:10px; border-radius:3px; border:1px solid var(--border-strong); flex-shrink:0; }
+  .sw.f1{ background:var(--feas-1); } .sw.f2{ background:var(--feas-2); } .sw.f3{ background:var(--feas-3); } .sw.f4{ background:var(--feas-4); }
+
+  /* ---------- feature cards ---------- */
+  .fgroup{ margin:28px 0; }
+  .fgroup-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
+  .fgroup-head h4{ font-family:'Source Serif 4',serif; font-size:17px; color:var(--ink); }
+  .fgroup-head .sub{ font-size:12.5px; color:var(--ink-3); }
+  .flist{ display:grid; gap:10px; list-style:none; padding:0; margin:0; }
+  .fitem{ display:grid; grid-template-columns:1fr auto; gap:16px; align-items:start; background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px 16px; }
+  .fitem .t{ font-size:14px; color:var(--ink); font-weight:600; margin-bottom:3px; }
+  .fitem .d{ font-size:13px; color:var(--ink-2); }
+  @media (max-width:640px){ .fitem{ grid-template-columns:1fr; } }
+
+  /* ---------- checklists ---------- */
+  .layer{ margin:28px 0; padding:22px 24px; background:var(--surface); border:1px solid var(--border); border-radius:10px; }
+  .layer-head{ display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+  .layer-swatch{ width:12px; height:12px; border-radius:3px; }
+  .layer h4{ font-family:'Source Serif 4',serif; font-size:18px; color:var(--ink); }
+  .check-grid{ display:grid; grid-template-columns:1fr 1fr; gap:8px 24px; padding:0; margin:0; list-style:none; }
+  @media (max-width:700px){ .check-grid{ grid-template-columns:1fr; } }
+  .check-grid li{ display:flex; gap:9px; font-size:13.5px; color:var(--ink-2); align-items:flex-start; margin:0; }
+  .check-grid li::before{ content:"—"; color:var(--ink-3); flex-shrink:0; }
+
+  /* ---------- meters (single-hue progress) ---------- */
+  .meter-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:24px 0 32px; }
+  @media (max-width:700px){ .meter-row{ grid-template-columns:1fr; } }
+  .meter{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 20px; }
+  .meter-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; }
+  .meter-top .lbl{ font-size:13.5px; font-weight:600; color:var(--ink); }
+  .meter-top .val{ font-family:'Source Serif 4',serif; font-size:20px; font-weight:600; color:var(--accent-ink); }
+  .meter-track{ height:8px; border-radius:100px; background:var(--surface-alt); overflow:hidden; }
+  .meter-fill{ height:100%; border-radius:100px; background:var(--accent); }
+  .meter-note{ font-size:11.5px; color:var(--ink-3); margin-top:8px; }
+
+  /* ---------- stacked bar ---------- */
+  .stackwrap{ margin:24px 0 8px; }
+  .stackbar{ display:flex; width:100%; height:40px; border-radius:8px; overflow:hidden; border:1px solid var(--border-strong); }
+  .seg{ display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:700; color:#fff; position:relative; }
+  .seg span{ text-shadow:0 1px 2px rgba(0,0,0,0.25); }
+  .seg + .seg{ border-left:2px solid var(--bg); }
+  .legend{ display:flex; flex-wrap:wrap; gap:16px 24px; margin-top:14px; }
+  .legend-item{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-2); }
+  .legend-swatch{ width:11px; height:11px; border-radius:3px; flex-shrink:0; }
+
+  /* ---------- roadmap ---------- */
+  .roadmap{ display:flex; flex-direction:column; margin-top:24px; }
+  .phase{ display:grid; grid-template-columns:56px minmax(0,1fr); gap:20px; position:relative; padding-bottom:32px; }
+  .phase:last-child{ padding-bottom:0; }
+  .phase-rail{ display:flex; flex-direction:column; align-items:center; }
+  .phase-num{ width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Source Serif 4',serif; font-weight:700; font-size:15px; flex-shrink:0; }
+  .phase-line{ width:2px; flex:1; background:var(--border-strong); margin-top:6px; }
+  .phase:last-child .phase-line{ display:none; }
+  .phase-card{ background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 22px; }
+  .phase-head{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:8px; }
+  .phase-head h4{ font-family:'Source Serif 4',serif; font-size:17px; color:var(--ink); }
+  .phase-when{ font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-3); font-weight:600; white-space:nowrap; }
+  .phase-card p{ font-size:13.5px; margin-bottom:10px; }
+  .phase-card ul{ margin:0; padding-left:1.1em; }
+  .phase-card li{ font-size:13px; margin-bottom:3px; }
+
+  /* ---------- final list ---------- */
+  .final-list{ list-style:none; padding:0; margin:24px 0 0; counter-reset:fin; }
+  .final-list li{ counter-increment:fin; display:grid; grid-template-columns:32px 1fr; gap:14px; padding:14px 0; border-top:1px solid var(--border); }
+  .final-list li:first-child{ border-top:none; }
+  .final-list li::before{ content:counter(fin); font-family:'Source Serif 4',serif; font-weight:700; font-size:16px; color:var(--accent-ink); }
+  .final-list .t{ color:var(--ink); font-weight:600; font-size:14.5px; margin-bottom:3px; }
+  .final-list .d{ color:var(--ink-2); font-size:13.5px; }
+
+  footer{ margin-top:80px; padding-top:24px; border-top:1px solid var(--border); font-size:12px; color:var(--ink-3); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+  /* ---------- print ---------- */
+  @media print{
+    :root{ color-scheme:light !important; }
+    body{ background:#fff; }
+    .side{ display:none; }
+    .shell{ display:block; max-width:100%; padding:0 8mm; }
+    main{ padding-top:0; }
+    section{ break-inside:avoid-page; margin-bottom:36px; }
+    .table-wrap, .layer, .phase-card, .callout, .stat, .meter, .fitem{ break-inside:avoid; box-shadow:none; }
+    a{ color:var(--accent-ink); }
+    .cover{ break-after:avoid; }
+  }
+  @media (prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth; } }
+</style>
+
+<div class="shell">
+  <aside class="side">
+    <div class="side-kicker">Contents</div>
+    <nav id="toc">
+      <a href="#exec" class="navlink">Executive summary</a>
+      <a href="#comparison" class="navlink">Proposal vs. build</a>
+      <a href="#completed" class="navlink">Completed work</a>
+      <a href="#partial" class="navlink">Partially completed</a>
+      <a href="#missing" class="navlink">Not implemented</a>
+      <a href="#recommend" class="navlink">Recommended features</a>
+      <a href="#feasibility" class="navlink">Feasibility matrix</a>
+      <a href="#breakdown" class="navlink">Work breakdown</a>
+      <a href="#workload" class="navlink">Workload estimate</a>
+      <a href="#roadmap" class="navlink">Roadmap</a>
+      <a href="#risks" class="navlink">Risks &amp; housekeeping</a>
+      <a href="#final" class="navlink">Recommendations</a>
+    </nav>
+  </aside>
+
+  <main>
+    <div class="cover">
+      <div class="cover-kicker">
+        <span class="badge accent">FYP progress review</span>
+        <span class="badge">Internal — for supervisor review</span>
+      </div>
+      <h1>NeuroPay Progress Report</h1>
+      <p class="dek">A line-by-line comparison of the AI-Powered Centralized Subscription Management System as proposed against what exists in the <code class="inline">frontend-dev</code> branch today — plus a feasibility-checked feature roadmap to close the gap.</p>
+      <div class="cover-meta">
+        <div><div class="k">Project</div><div class="v">AI-Powered Centralized Subscription Management System for Banking Platforms</div></div>
+        <div><div class="k">Team</div><div class="v">Wania Khan · Shahzaib Sajjad · Esha Arshad</div></div>
+        <div><div class="k">Supervisor</div><div class="v">Miss Huma Rashid</div></div>
+        <div><div class="k">Proposal dated</div><div class="v">12 Mar 2026</div></div>
+        <div><div class="k">Review date</div><div class="v">27 Aug 2026</div></div>
+        <div><div class="k">Repo state reviewed</div><div class="v">branch <code class="inline">frontend-dev</code>, commit <code class="inline">6ceb1c1</code></div></div>
+      </div>
+    </div>
+
+    <!-- ================= EXEC SUMMARY ================= -->
+    <section id="exec">
+      <div class="eyebrow">01 — Executive summary</div>
+      <h2>One layer is real. The layer the FYP is graded on isn't built yet.</h2>
+      <p class="section-intro">The repository currently contains a fully designed React Native (Expo) mobile shell and a Spring Boot authentication service — both genuinely solid. What it does not yet contain is any part of the system the proposal's four research objectives actually promise: a subscription data model, a transaction pipeline, an AI detection engine, or fraud/anomaly logic. Every subscription, alert, and "AI insight" visible in the app today is a hard-coded array in <code class="inline">frontend/constants/mockData.ts</code>, not a live signal from the backend.</p>
+
+      <div class="stat-row">
+        <div class="stat"><div class="n">1 / 4</div><div class="l">Proposal objectives with backend code behind them (auth only)</div></div>
+        <div class="stat"><div class="n">0</div><div class="l">Lines of AI/ML code in the repository</div></div>
+        <div class="stat"><div class="n">2</div><div class="l">Database tables exist — <code class="inline">users</code>, <code class="inline">password_reset_tokens</code></div></div>
+        <div class="stat"><div class="n">15+</div><div class="l">Frontend screens fully built, mostly wired to mock data</div></div>
+      </div>
+
+      <div class="callout risk">
+        <div class="ico">⏱</div>
+        <div class="body">
+          <div class="title">Schedule check against your own Gantt chart</div>
+          <p>The proposal is dated 12 March 2026; today is roughly week 24 of the stated 43-week plan (approximate, read off the submitted chart). By this point, Phase 2 (weeks 13–22) commits the team to a working <em>Transaction &amp; Subscription Service</em>, an <em>Initial Subscription Detection Model</em>, and a <em>Fraud Detection Algorithm Prototype</em> — none of which exist in the repo. What <em>has</em> been delivered ahead of schedule is <em>Security &amp; Authentication Modules</em>, formally a Phase 3 (week ~28) item, plus a level of frontend dashboard polish beyond what Phase 2 asked for. In short: the team has been building the shell and the login system very well, while the graded core — subscription intelligence — hasn't started. That's the single most important finding in this report.</p>
+        </div>
+      </div>
+
+      <p>The rest of this document breaks that gap down feature-by-feature, separates what's genuinely done from what only <em>looks</em> done in the UI, and lays out a feasibility-checked path — including several commercially interesting additions (a subscription marketplace, plan comparison, AI cost recommendations) — to bring the build back in line with the proposal before final submission.</p>
+    </section>
+
+    <!-- ================= COMPARISON ================= -->
+    <section id="comparison">
+      <div class="eyebrow">02 — Proposal vs. current build</div>
+      <h2>Every proposed capability, checked against the code</h2>
+      <p class="section-intro">Status reflects what runs today, not what's designed on screen. "Partial" means either the UI exists with no backend, or the backend exists with no real logic behind it.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Proposed capability</th><th>Status</th><th>Evidence in repo</th></tr></thead>
+          <tbody>
+            <tr><td class="name">Centralized subscription dashboard</td><td><span class="pill"><span class="dot warn"></span>Partial — UI only</span></td><td class="evidence"><code class="inline">app/(tabs)/index.tsx</code>, <code class="inline">subscriptions.tsx</code> render <code class="inline">constants/mockData.ts</code>; no subscription API</td></tr>
+            <tr><td class="name">AI subscription detection (recurring-payment ML)</td><td><span class="pill"><span class="dot bad"></span>Not implemented</span></td><td class="evidence">No Python/ML code anywhere in the repository; no transaction data to detect patterns from</td></tr>
+            <tr><td class="name">Fraud alerts (price hikes, suspicious charges)</td><td><span class="pill"><span class="dot bad"></span>Not implemented</span></td><td class="evidence"><code class="inline">app/(tabs)/alerts.tsx</code> renders 4 hand-written alert objects; no detection engine, no alert table</td></tr>
+            <tr><td class="name">Inactive-subscription monitoring</td><td><span class="pill"><span class="dot bad"></span>Not implemented</span></td><td class="evidence">No usage-tracking field, job, or model anywhere; "haven't used Figma in 45 days" is a hard-coded string</td></tr>
+            <tr><td class="name">User controls — approve / pause / block</td><td><span class="pill"><span class="dot warn"></span>Partial — display only</span></td><td class="evidence">Status badges render in <code class="inline">subscriptions.tsx</code>; no endpoint changes a subscription's state</td></tr>
+            <tr><td class="name">Notifications (app / email / SMS)</td><td><span class="pill"><span class="dot warn"></span>Partial</span></td><td class="evidence"><code class="inline">MailService.java</code> sends welcome &amp; reset-password email only; no subscription/fraud channel, no SMS, no push</td></tr>
+            <tr><td class="name">Auth &amp; account security</td><td><span class="pill"><span class="dot good"></span>Complete</span></td><td class="evidence"><code class="inline">AuthController</code>, <code class="inline">JwtService</code>, <code class="inline">SecurityConfig</code> — signup/signin/forgot/reset, fully wired end-to-end</td></tr>
+            <tr><td class="name">Virtual card issuance</td><td><span class="pill"><span class="dot warn"></span>Partial — cosmetic</span></td><td class="evidence"><code class="inline">VirtualCardService.java</code> generates a unique-looking 16-digit number; no card network, no PCI scope, no linked ledger</td></tr>
+            <tr><td class="name">Wallet balance / funding</td><td><span class="pill"><span class="dot warn"></span>Partial — fragile</span></td><td class="evidence">Balance lives only in browser <code class="inline">localStorage</code> (<code class="inline">AuthContext.tsx</code>); no-ops on native iOS/Android, so it doesn't persist on an actual mobile install</td></tr>
+            <tr><td class="name">External funding cards (add/edit/remove)</td><td><span class="pill"><span class="dot warn"></span>Partial — UI only</span></td><td class="evidence"><code class="inline">cards/index.tsx</code> keeps cards in local component state seeded from <code class="inline">initialExternalCards</code>; resets on reload</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= COMPLETED ================= -->
+    <section id="completed">
+      <div class="eyebrow">03 — What's actually completed</div>
+      <h2>Solid, production-shaped work — mostly in one layer</h2>
+      <p class="section-intro">This is real, working code, not a mockup. It's just concentrated in identity/auth and the visual shell rather than the subscription domain.</p>
+
+      <h3>Backend — authentication service</h3>
+      <ul>
+        <li>Full JWT sign-up / sign-in with BCrypt password hashing, access + refresh tokens (<code class="inline">JwtService</code>, <code class="inline">JwtAuthFilter</code>, <code class="inline">SecurityConfig</code>)</li>
+        <li>Forgot-password / reset-password flow with a real expiring-token entity (<code class="inline">PasswordResetToken</code>, <code class="inline">PasswordResetTokenRepository</code>) rather than a stubbed endpoint</li>
+        <li>Transactional HTML email via Gmail SMTP + Thymeleaf templates for welcome and reset-password mail (<code class="inline">MailService.java</code>, <code class="inline">MailConfig.java</code>), sent asynchronously</li>
+        <li>Consistent API envelope (<code class="inline">ApiResponse&lt;T&gt;</code>) and a global exception handler covering duplicate-user, invalid-token, and not-found cases</li>
+        <li>Role enum and Spring Security wiring in place for future authorization checks</li>
+      </ul>
+
+      <h3>Frontend — application shell</h3>
+      <ul>
+        <li>Complete Expo Router navigation: auth stack (login, signup, forgot/reset password, add-card) + 5-tab shell (home, subscriptions, wallet, alerts, profile) + a cards stack</li>
+        <li>Auth context wired live to the backend (<code class="inline">services/api.ts</code>, <code class="inline">context/AuthContext.tsx</code>) — sign-up/sign-in genuinely round-trip to Spring Boot and store the JWT</li>
+        <li>A polished, consistent dark-mode design system (Manrope type scale, motion via Reanimated) applied across every screen</li>
+        <li>A believable virtual-card visualization component (<code class="inline">components/ui/CreditCard.tsx</code>) reflecting the real backend-issued card number</li>
+      </ul>
+    </section>
+
+    <!-- ================= PARTIAL ================= -->
+    <section id="partial">
+      <div class="eyebrow">04 — Partially completed</div>
+      <h2>Looks finished on screen; the other half is missing</h2>
+      <p class="section-intro">These are the highest-leverage fixes: the UI work is already paid for, so closing each gap is mostly backend and wiring, not redesign.</p>
+
+      <div class="fgroup">
+        <ul class="flist">
+          <li class="fitem"><div><div class="t">Wallet balance</div><div class="d">Deposit/freeze UI is complete and feels real, but the balance is a browser-only <code class="inline">localStorage</code> number with no server-side wallet entity or transaction ledger. On native Android/iOS it silently doesn't persist at all — <code class="inline">safeStorage</code> is a web-only no-op.</div></div><span class="pill"><span class="dot warn"></span>Needs backend</span></li>
+          <li class="fitem"><div><div class="t">Virtual card issuance</div><div class="d"><code class="inline">VirtualCardService</code> guarantees a unique-looking number, but it isn't attached to a real card network, has no spend limit enforcement, and can't actually authorize a charge.</div></div><span class="pill"><span class="dot warn"></span>Cosmetic</span></li>
+          <li class="fitem"><div><div class="t">External funding cards</div><div class="d">Add/edit/delete all work against in-memory component state seeded with two demo cards; nothing survives a reload, and there's no encryption/tokenization story for card data at all.</div></div><span class="pill"><span class="dot warn"></span>UI only</span></li>
+          <li class="fitem"><div><div class="t">Notifications</div><div class="d">The email pipe is real and reusable — it just isn't hooked to anything except auth. There's no notification table, no in-app inbox backing the Alerts tab, and no SMS/push transport.</div></div><span class="pill"><span class="dot warn"></span>Auth-only</span></li>
+          <li class="fitem"><div><div class="t">Profile screen</div><div class="d"><code class="inline">profile.tsx</code> doesn't call <code class="inline">useAuth()</code> at all — name, email, and the "$247/mo · $540 saved" stats are hard-coded, so it currently shows the same fake profile for every logged-in user.</div></div><span class="pill"><span class="dot warn"></span>Not wired</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= MISSING ================= -->
+    <section id="missing">
+      <div class="eyebrow">05 — Proposed but not started</div>
+      <h2>The core of the FYP is currently a blank slate</h2>
+      <p class="section-intro">These are the objectives the proposal is actually graded against. None have any code, schema, or scaffolding yet.</p>
+      <ul>
+        <li><strong>AI microservice</strong> — the proposal's own architecture calls for a Python/scikit-learn/TensorFlow service; zero Python files exist in the repository.</li>
+        <li><strong>Subscription &amp; Transaction data model</strong> — no entities, repositories, or migrations for subscriptions, transactions, or merchants. There is nothing yet for an AI model to detect patterns <em>from</em>.</li>
+        <li><strong>Recurring-payment / subscription detection logic</strong> — rule-based or ML — does not exist.</li>
+        <li><strong>Fraud / anomaly scoring with confidence output</strong> — does not exist.</li>
+        <li><strong>Inactive-subscription usage tracking</strong> — no usage signal is ever captured, so "unused for 45 days" can't be computed.</li>
+        <li><strong>Subscription lifecycle endpoints</strong> — approve, pause, block, cancel — none are exposed by the backend.</li>
+        <li><strong>Notification service as its own component</strong> — the architecture diagram calls for one; today it's two email templates bolted onto auth.</li>
+        <li><strong>Automated tests</strong> — beyond the default Spring Boot scaffold test (<code class="inline">NeuroPayApplicationTests</code>), there is no test coverage on either side of the stack.</li>
+      </ul>
+    </section>
+
+    <!-- ================= RECOMMEND ================= -->
+    <section id="recommend">
+      <div class="eyebrow">06 — New features worth adding</div>
+      <h2>What would make this commercially credible, not just complete</h2>
+      <p class="section-intro">Grouped by theme. Each item carries a feasibility swatch — see the matrix in the next section for what the swatches mean.</p>
+
+      <div class="fgroup">
+        <div class="fgroup-head"><h4>A. Subscription marketplace &amp; comparison</h4><span class="sub">Netflix, Spotify, ChatGPT/Gemini, cloud storage, gym — browse and compare in-app</span></div>
+        <ul class="flist">
+          <li class="fitem"><div><div class="t">In-app plan catalog</div><div class="d">A curated, admin-maintained list of common subscriptions with tiers, price, and features — Netflix Basic/Standard/Premium, Spotify, ChatGPT Plus/Pro, iCloud+/Google One, gym memberships.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Side-by-side plan comparison</div><div class="d">Compare two or more catalog entries (or a catalog entry against the user's current active subscription) on price, features, and billing cycle.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">One-tap "subscribe" via the virtual card</div><div class="d">Debit the in-app wallet ledger and record a new subscription — a sandboxed checkout, not a real charge to Netflix/OpenAI.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Actually creating the external account</div><div class="d">Genuinely provisioning a real Netflix, Spotify, or ChatGPT subscription on the user's behalf.</div></div><span class="feas"><span class="sw f4"></span>Not realistically possible</span></li>
+        </ul>
+      </div>
+
+      <div class="fgroup">
+        <div class="fgroup-head"><h4>B. AI &amp; intelligence</h4><span class="sub">The part the grade actually hinges on</span></div>
+        <ul class="flist">
+          <li class="fitem"><div><div class="t">Rule-based recurring-payment detector (v1)</div><div class="d">Group transactions by merchant + amount tolerance + interval (7/30/365 days) before reaching for ML — a believable, gradeable "detection" step that also produces labelled data for a later model.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">ML anomaly / fraud scoring</div><div class="d">Isolation Forest or a small autoencoder over transaction features, trained on synthetic/sandbox data, producing the confidence score the proposal promises.</div></div><span class="feas"><span class="sw f1"></span>Possible now, on synthetic data</span></li>
+          <li class="fitem"><div><div class="t">Merchant name normalization &amp; auto-categorization</div><div class="d">Turn "NFLX*8817262" into "Netflix / Entertainment" via a small NER model or an LLM call, then group spend by category.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Personalized savings recommendations</div><div class="d">"You haven't opened Figma in 45 days — pausing saves $180/yr" generated from real usage/billing data rather than typed as a string.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Bank-grade fraud accuracy at the 95%+ figure quoted in the pitch deck</div><div class="d">Requires volumes of real labelled transaction data no student project has access to.</div></div><span class="feas"><span class="sw f3"></span>Significant R&amp;D — treat as a stretch target, report honestly against synthetic-data accuracy</span></li>
+        </ul>
+      </div>
+
+      <div class="fgroup">
+        <div class="fgroup-head"><h4>C. Payments &amp; banking</h4></div>
+        <ul class="flist">
+          <li class="fitem"><div><div class="t">Real wallet ledger</div><div class="d">A proper double-entry transaction table in Postgres backing balance, deposits, and subscription debits — replacing the <code class="inline">localStorage</code> number.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Real top-ups via a payment gateway</div><div class="d">Stripe (or a Pakistan-market PSP like JazzCash/Easypaisa) sandbox for genuinely funding the wallet from a real card.</div></div><span class="feas"><span class="sw f2"></span>Needs a gateway account</span></li>
+          <li class="fitem"><div><div class="t">Multi-bank aggregation (Plaid/TrueLayer-style)</div><div class="d">Reading real transactions across a user's actual bank accounts, as the pitch deck's "direct banking integration" implies.</div></div><span class="feas"><span class="sw f2"></span>Possible internationally with a partner; <span class="sw f4" style="margin-left:6px"></span>not realistically available in Pakistan today — there is no public open-banking API layer to integrate with</div></div></li>
+          <li class="fitem"><div><div class="t">A real bank's fraud webhook / core-banking integration</div><div class="d">What "banking platform" integration would mean in production.</div></div><span class="feas"><span class="sw f4"></span>Not realistically possible for a self-issued FYP card</span></li>
+        </ul>
+      </div>
+
+      <div class="fgroup">
+        <div class="fgroup-head"><h4>D. Notifications &amp; engagement</h4></div>
+        <ul class="flist">
+          <li class="fitem"><div><div class="t">Push notifications</div><div class="d">Expo's push service, already available for free inside the current Expo project.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">In-app notification center</div><div class="d">A real inbox with read/unread state backing the Alerts tab, replacing the 4 mock alert objects.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">SMS alerts</div><div class="d">Twilio (or a local aggregator) for the "SMS" channel promised in the proposal.</div></div><span class="feas"><span class="sw f2"></span>Needs a Twilio-class account</span></li>
+          <li class="fitem"><div><div class="t">Biometric login</div><div class="d"><code class="inline">expo-local-authentication</code> — Face ID / fingerprint unlock, matching the pitch deck's roadmap slide.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+        </ul>
+      </div>
+
+      <div class="fgroup">
+        <div class="fgroup-head"><h4>E. Analytics &amp; controls</h4></div>
+        <ul class="flist">
+          <li class="fitem"><div><div class="t">Category-wise spend breakdown &amp; monthly trend</div><div class="d">Once real transaction data exists, this is a straightforward chart layer on top of it.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Spend forecasting</div><div class="d">Simple linear/seasonal projection of next month's subscription spend based on active plans.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Budget caps with auto-block</div><div class="d">Let a user cap monthly subscription spend and have new charges above the cap auto-flag or auto-pause.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+          <li class="fitem"><div><div class="t">Family / shared subscription splitting</div><div class="d">Split one subscription's cost across linked household accounts.</div></div><span class="feas"><span class="sw f1"></span>Possible now</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= FEASIBILITY ================= -->
+    <section id="feasibility">
+      <div class="eyebrow">07 — Feasibility matrix</div>
+      <h2>What's realistic to promise in the final report</h2>
+      <p class="section-intro">Ordered by dependency, not difficulty of code alone — a "possible now" item still takes real engineering effort, it just doesn't wait on anyone outside the team.</p>
+
+      <div class="legend" style="margin:20px 0 4px;">
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--feas-1); border:1px solid var(--border-strong)"></span>Possible now, in-house</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--feas-2); border:1px solid var(--border-strong)"></span>Possible — needs a 3rd-party API / account</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--feas-3); border:1px solid var(--border-strong)"></span>Requires significant R&amp;D or data the team doesn't have</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--feas-4); border:1px solid var(--border-strong)"></span>Not realistically possible at FYP scope</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Feasibility</th><th>Why</th></tr></thead>
+          <tbody>
+            <tr><td class="name">Rule-based subscription detection</td><td><span class="feas"><span class="sw f1"></span>Possible now</span></td><td>Pure logic over your own transaction table</td></tr>
+            <tr><td class="name">In-app marketplace &amp; plan comparison</td><td><span class="feas"><span class="sw f1"></span>Possible now</span></td><td>Static/admin-curated catalog data, no external dependency</td></tr>
+            <tr><td class="name">Wallet ledger, freeze/unfreeze, spend caps</td><td><span class="feas"><span class="sw f1"></span>Possible now</span></td><td>Standard backend CRUD + business rules</td></tr>
+            <tr><td class="name">ML anomaly/fraud scoring (synthetic data)</td><td><span class="feas"><span class="sw f1"></span>Possible now</span></td><td>Off-the-shelf scikit-learn models on a generated dataset</td></tr>
+            <tr><td class="name">Push notifications, biometric login</td><td><span class="feas"><span class="sw f1"></span>Possible now</span></td><td>Already available inside the current Expo SDK</td></tr>
+            <tr><td class="name">Real payment gateway top-ups</td><td><span class="feas"><span class="sw f2"></span>Needs a partner</span></td><td>Requires a Stripe/JazzCash/Easypaisa merchant account</td></tr>
+            <tr><td class="name">SMS delivery</td><td><span class="feas"><span class="sw f2"></span>Needs a partner</span></td><td>Requires Twilio or a local SMS gateway account</td></tr>
+            <tr><td class="name">Multi-bank account aggregation (global markets)</td><td><span class="feas"><span class="sw f2"></span>Needs a partner</span></td><td>Plaid/TrueLayer-class provider, outside Pakistan</td></tr>
+            <tr><td class="name">95%+ accuracy fraud detection on real bank data</td><td><span class="feas"><span class="sw f3"></span>Significant R&amp;D</span></td><td>Needs volume/variety of labelled real transactions no student project has</td></tr>
+            <tr><td class="name">Automated real-world subscription cancellation on the provider's side</td><td><span class="feas"><span class="sw f3"></span>Significant R&amp;D</span></td><td>No standard API most subscription merchants expose for this</td></tr>
+            <tr><td class="name">Real multi-bank Open Banking integration in Pakistan</td><td><span class="feas"><span class="sw f4"></span>Not realistically possible</span></td><td>No public open-banking API layer exists in the Pakistani market today</td></tr>
+            <tr><td class="name">Genuinely provisioning real Netflix/Spotify/ChatGPT accounts</td><td><span class="feas"><span class="sw f4"></span>Not realistically possible</span></td><td>No merchant-side self-serve provisioning API exists for this</td></tr>
+            <tr><td class="name">Direct core-banking / real fraud webhook integration</td><td><span class="feas"><span class="sw f4"></span>Not realistically possible</span></td><td>Requires being an actual regulated bank, not a self-issued virtual card</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= BREAKDOWN ================= -->
+    <section id="breakdown">
+      <div class="eyebrow">08 — Remaining work, by layer</div>
+      <h2>What's left to build, itemized</h2>
+
+      <div class="layer">
+        <div class="layer-head"><span class="layer-swatch" style="background:var(--chip-frontend)"></span><h4>Frontend</h4></div>
+        <ul class="check-grid">
+          <li>Replace every mock array in <code class="inline">mockData.ts</code> with live API calls</li>
+          <li>Build marketplace &amp; plan-comparison screens</li>
+          <li>Wire wallet screen to real backend ledger endpoints</li>
+          <li>Wire cards screen to real funding-card CRUD</li>
+          <li>Build a real notification center + push registration</li>
+          <li>Wire the profile screen to <code class="inline">useAuth()</code> and real stats</li>
+          <li>Add approve/pause/block actions calling the backend</li>
+          <li>Add spend analytics charts</li>
+          <li>Add biometric login option</li>
+        </ul>
+      </div>
+
+      <div class="layer">
+        <div class="layer-head"><span class="layer-swatch" style="background:var(--chip-backend)"></span><h4>Backend</h4></div>
+        <ul class="check-grid">
+          <li>Design &amp; implement Subscription, Transaction, Merchant, Alert, Notification, Wallet entities</li>
+          <li>Transaction ingestion endpoint/service (simulated bank feed is acceptable)</li>
+          <li>Subscription CRUD + status-change (pause/block/approve) endpoints</li>
+          <li>Alerts/notification REST + delivery service, extending <code class="inline">MailService</code></li>
+          <li>Wallet service — balance, deposit, ledger, server-side freeze state</li>
+          <li>Marketplace/catalog endpoints + sandboxed checkout</li>
+          <li>Role-based authorization beyond the current <code class="inline">Role</code> enum</li>
+          <li>Move DB password, mail app password, JWT secret out of <code class="inline">application.yml</code></li>
+          <li>Real unit/integration test suite</li>
+        </ul>
+      </div>
+
+      <div class="layer">
+        <div class="layer-head"><span class="layer-swatch" style="background:var(--chip-ai)"></span><h4>AI / ML</h4></div>
+        <ul class="check-grid">
+          <li>Stand up the Python microservice (FastAPI/Flask) per the proposed architecture</li>
+          <li>Data pipeline: ingest &amp; normalize transaction data with pandas</li>
+          <li>Recurring-payment detector — start rule-based, evolve toward clustering</li>
+          <li>Anomaly/fraud scoring model with a confidence output</li>
+          <li>Merchant categorization (NLP or LLM-assisted)</li>
+          <li>Inactive-subscription usage inference</li>
+          <li>Training/evaluation harness with an honestly reported accuracy figure</li>
+          <li>Real-time inference endpoint the Spring Boot backend can call</li>
+        </ul>
+      </div>
+
+      <div class="layer">
+        <div class="layer-head"><span class="layer-swatch" style="background:var(--chip-integ)"></span><h4>Third-party integrations</h4></div>
+        <ul class="check-grid">
+          <li>Payment gateway sandbox (Stripe / JazzCash / Easypaisa)</li>
+          <li>Push notifications (Expo Push / FCM)</li>
+          <li>SMS (Twilio or local equivalent)</li>
+          <li>A realistic synthetic transaction generator standing in for a bank feed — clearly labelled as simulated in the final report</li>
+          <li>Optional: an LLM API (Claude/GPT) for merchant normalization and natural-language spend insights</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ================= WORKLOAD ================= -->
+    <section id="workload">
+      <div class="eyebrow">09 — Workload estimate</div>
+      <h2>Where the project stands, and where the remaining effort sits</h2>
+      <p class="section-intro">Qualitative sizing based on scope breadth of the checklists above, not timed estimates — useful for prioritizing, not for billing.</p>
+
+      <h3>Current completion, by layer</h3>
+      <div class="meter-row">
+        <div class="meter">
+          <div class="meter-top"><span class="lbl">Frontend</span><span class="val tabular">55%</span></div>
+          <div class="meter-track"><div class="meter-fill" style="width:55%"></div></div>
+          <div class="meter-note">Full screen set built; still running on mock data</div>
+        </div>
+        <div class="meter">
+          <div class="meter-top"><span class="lbl">Backend</span><span class="val tabular">20%</span></div>
+          <div class="meter-track"><div class="meter-fill" style="width:20%"></div></div>
+          <div class="meter-note">Auth is solid; the subscription domain hasn't started</div>
+        </div>
+        <div class="meter">
+          <div class="meter-top"><span class="lbl">AI / ML</span><span class="val tabular">0%</span></div>
+          <div class="meter-track"><div class="meter-fill" style="width:0%"></div></div>
+          <div class="meter-note">No code exists yet</div>
+        </div>
+      </div>
+
+      <h3>Where the remaining effort lies</h3>
+      <div class="stackwrap">
+        <div class="stackbar" role="img" aria-label="Remaining workload: Backend 35%, AI 30%, Frontend 20%, Third-party integrations 15%">
+          <div class="seg" style="width:35%; background:var(--chip-backend)"><span>35%</span></div>
+          <div class="seg" style="width:30%; background:var(--chip-ai)"><span>30%</span></div>
+          <div class="seg" style="width:20%; background:var(--chip-frontend)"><span>20%</span></div>
+          <div class="seg" style="width:15%; background:var(--chip-integ)"><span>15%</span></div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--chip-backend)"></span>Backend — 35%</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--chip-ai)"></span>AI / ML — 30%</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--chip-frontend)"></span>Frontend — 20%</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--chip-integ)"></span>Third-party integrations — 15%</div>
+        </div>
+      </div>
+      <p style="margin-top:16px;">Backend and AI dominate what's left because they're starting from zero on the domain that matters most for grading, while the frontend only needs re-wiring rather than redesign.</p>
+    </section>
+
+    <!-- ================= ROADMAP ================= -->
+    <section id="roadmap">
+      <div class="eyebrow">10 — Recommended roadmap</div>
+      <h2>Five phases to close the gap before final submission</h2>
+      <p class="section-intro">Sequenced so each phase produces something demoable, and so the AI model has real data to train on by the time it's built.</p>
+
+      <div class="roadmap">
+        <div class="phase">
+          <div class="phase-rail"><div class="phase-num">1</div><div class="phase-line"></div></div>
+          <div class="phase-card">
+            <div class="phase-head"><h4>Core data model &amp; transaction pipeline</h4><span class="phase-when">Weeks 1–2</span></div>
+            <p>Stand up the domain the rest of the system depends on.</p>
+            <ul><li>Subscription, Transaction, Merchant, Wallet entities + migrations</li><li>A synthetic/sandbox transaction generator, clearly labelled as simulated</li><li>Wallet ledger replacing the <code class="inline">localStorage</code> balance</li></ul>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-rail"><div class="phase-num">2</div><div class="phase-line"></div></div>
+          <div class="phase-card">
+            <div class="phase-head"><h4>Rule-based subscription &amp; fraud detection (v1)</h4><span class="phase-when">Weeks 3–4</span></div>
+            <p>A believable, working detection layer before reaching for ML — and the source of labelled data for it.</p>
+            <ul><li>Recurring-payment detector (merchant + amount tolerance + interval)</li><li>Price-increase and unknown-merchant flags</li><li>Real alerts backing the Alerts tab, replacing the mock array</li></ul>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-rail"><div class="phase-num">3</div><div class="phase-line"></div></div>
+          <div class="phase-card">
+            <div class="phase-head"><h4>AI microservice</h4><span class="phase-when">Weeks 5–7</span></div>
+            <p>The proposal's centerpiece — built on data the earlier phases now produce.</p>
+            <ul><li>Python/FastAPI service; scikit-learn anomaly model with a confidence score</li><li>Merchant categorization</li><li>Honest accuracy evaluation reported against the synthetic dataset</li></ul>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-rail"><div class="phase-num">4</div><div class="phase-line"></div></div>
+          <div class="phase-card">
+            <div class="phase-head"><h4>User controls &amp; notifications</h4><span class="phase-when">Weeks 8–9</span></div>
+            <p>Close the loop the proposal promises: users acting on what the system detects.</p>
+            <ul><li>Approve / pause / block endpoints wired to the frontend</li><li>Push notifications; notification center screen</li><li>Budget caps with auto-flagging</li></ul>
+          </div>
+        </div>
+        <div class="phase">
+          <div class="phase-rail"><div class="phase-num">5</div></div>
+          <div class="phase-card">
+            <div class="phase-head"><h4>Marketplace, analytics &amp; demo hardening</h4><span class="phase-when">Weeks 10–12</span></div>
+            <p>The commercial-credibility layer, plus getting the whole thing demo-ready.</p>
+            <ul><li>Plan catalog + comparison + sandboxed one-tap subscribe</li><li>Category spend analytics &amp; forecasting</li><li>Secrets moved out of <code class="inline">application.yml</code>; core test coverage; final QA pass</li></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= RISKS ================= -->
+    <section id="risks">
+      <div class="eyebrow">11 — Risks &amp; housekeeping</div>
+      <h2>Fix these regardless of feature priority</h2>
+
+      <div class="callout risk">
+        <div class="ico">⚠</div>
+        <div class="body"><div class="title">Secrets are committed in plaintext</div><p><code class="inline">application.yml</code> contains a live-looking Postgres password, a Gmail app password, and the JWT signing key, all checked into the repository. Rotate these credentials and move them to environment variables before the repo is ever shared publicly or with markers outside the team.</p></div>
+      </div>
+      <div class="callout risk">
+        <div class="ico">📱</div>
+        <div class="body"><div class="title">Wallet balance doesn't survive a real mobile install</div><p><code class="inline">safeStorage</code> in <code class="inline">AuthContext.tsx</code> only reads/writes on <code class="inline">Platform.OS === "web"</code>. On an actual Android/iOS build, deposits silently vanish on next launch — worth fixing before a live demo on a phone, not just in the browser preview.</p></div>
+      </div>
+      <div class="callout risk">
+        <div class="ico">👤</div>
+        <div class="body"><div class="title">Profile screen shows fake data to every user</div><p><code class="inline">profile.tsx</code> hard-codes a name, email, and spend stats instead of reading <code class="inline">useAuth()</code> — a quick, high-visibility fix.</p></div>
+      </div>
+      <div class="callout">
+        <div class="ico">🏦</div>
+        <div class="body"><div class="title">Calibrate the "banking integration" claim</div><p>The pitch deck's "direct banking integration" and "Pakistan Focus... local banking APIs" language over-promises relative to what's achievable without an actual bank partner. Recommend reframing the final report around a <em>self-issued virtual card + simulated bank feed</em>, which is exactly what's buildable, rather than implying live third-party bank connectivity.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= FINAL ================= -->
+    <section id="final">
+      <div class="eyebrow">12 — Final recommendations</div>
+      <h2>The five moves that matter most before submission</h2>
+      <ol class="final-list">
+        <li><div class="t">Build the data model first, not the model</div><div class="d">A Subscription/Transaction schema and a synthetic feed unlock everything else — detection, alerts, and analytics all read from it.</div></li>
+        <li><div class="t">Ship rule-based detection before ML</div><div class="d">It's gradeable now, produces the labelled data an ML model needs later, and de-risks the AI phase if time runs short.</div></li>
+        <li><div class="t">Re-wire the frontend instead of rebuilding it</div><div class="d">The UI is already at production quality — replacing <code class="inline">mockData.ts</code> with real API calls is the fastest path to a genuinely working demo.</div></li>
+        <li><div class="t">Add the marketplace as the differentiator</div><div class="d">Plan comparison and sandboxed subscribe/cancel are fully achievable in-house and are exactly the kind of feature that reads as commercially credible to a panel.</div></li>
+        <li><div class="t">Rotate the committed secrets and fix native persistence</div><div class="d">Both are quick, both are the kind of thing a careful reviewer will notice immediately.</div></li>
+      </ol>
+    </section>
+
+    <footer>
+      <span>NeuroPay Progress Report — prepared from a direct review of the repository and the submitted FYP proposal</span>
+      <span>27 Aug 2026</span>
+    </footer>
+  </main>
+</div>
+
+<script>
+  (function(){
+    var links = Array.prototype.slice.call(document.querySelectorAll('.navlink'));
+    var sections = links.map(function(l){ return document.querySelector(l.getAttribute('href')); }).filter(Boolean);
+    if (!('IntersectionObserver' in window) || !sections.length) return;
+    var map = new Map();
+    sections.forEach(function(s, i){ map.set(s, links[i]); });
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        var link = map.get(entry.target);
+        if (!link) return;
+        if (entry.isIntersecting) {
+          links.forEach(function(l){ l.classList.remove('active'); });
+          link.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -75% 0px', threshold: 0 });
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>

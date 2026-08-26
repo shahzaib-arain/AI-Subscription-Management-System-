@@ -52,6 +52,26 @@ export interface ApiResponse<T> {
 }
 
 /**
+ * The backend reports field-level validation problems (e.g. "Password must
+ * contain uppercase, lowercase, digit, and special character") inside
+ * `data`, keyed by field name — not just in the top-level `message`. Pull
+ * those out so the real reason reaches the screen instead of a generic
+ * "Validation failed".
+ */
+function extractErrorMessage(json: any, status: number): string {
+  const fieldErrors = json?.data;
+  if (fieldErrors && typeof fieldErrors === "object" && !Array.isArray(fieldErrors)) {
+    const messages = Object.values(fieldErrors).filter(
+      (value): value is string => typeof value === "string" && value.length > 0
+    );
+    if (messages.length > 0) {
+      return messages.join(" ");
+    }
+  }
+  return json?.message || `Request failed with status ${status}. Please try again.`;
+}
+
+/**
  * Custom fetch wrapper that handles auth headers and parses responses
  */
 async function request<T>(
@@ -59,27 +79,32 @@ async function request<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
   const headers = new Headers(options.headers || {});
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers,
+    });
+  } catch (networkError) {
+    throw new Error("Couldn't reach the server. Check your connection and try again.");
+  }
 
   const text = await response.text();
   let json: any;
   try {
-    json = JSON.parse(text);
+    json = text ? JSON.parse(text) : {};
   } catch (e) {
     throw new Error(text || `Request failed with status ${response.status}`);
   }
 
   if (!response.ok) {
-    throw new Error(json.message || `API Error: ${response.status}`);
+    throw new Error(extractErrorMessage(json, response.status));
   }
 
   return json as ApiResponse<T>;

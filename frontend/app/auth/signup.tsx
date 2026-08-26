@@ -1,11 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, Link } from "expo-router";
-import Animated, { FadeInDown } from "react-native-reanimated";
-import { Mail, Lock, User, ArrowRight, Phone } from "lucide-react-native";
+import Animated, { FadeInDown, FadeOutUp } from "react-native-reanimated";
+import { Mail, Lock, User, ArrowRight, Phone, CheckCircle2 } from "lucide-react-native";
 import { useAuth } from "../../context/AuthContext";
 
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+import PasswordStrengthMeter from "../../components/ui/PasswordStrengthMeter";
+import { MIN_PASSWORD_LENGTH, isValidEmail, isValidPhone } from "../../utils/validation";
+import { useAutoDismiss } from "../../hooks/use-auto-dismiss";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -20,6 +23,31 @@ export default function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // A failed attempt on another screen (e.g. Login) leaves its error sitting
+  // in shared AuthContext state — clear it the moment this screen opens so
+  // it doesn't appear to belong to this screen.
+  useEffect(() => {
+    clearError();
+  }, []);
+
+  // Every error here — local validation or the API's — clears itself after
+  // a few seconds instead of sitting on screen indefinitely.
+  useAutoDismiss(validationError, () => setValidationError(null));
+  useAutoDismiss(apiError, clearError);
+
+  // Live, per-field feedback — computed on every keystroke so the user sees
+  // the problem immediately instead of only after pressing "Create Account".
+  const emailError = email.length > 0 && !isValidEmail(email) ? "Enter a valid email address." : null;
+  const phoneError =
+    phoneNumber.length > 0 && !isValidPhone(phoneNumber.replace(/\s+/g, ""))
+      ? "Enter a valid phone number (e.g. +923001234567)."
+      : null;
+  const confirmError =
+    confirmPassword.length > 0 && confirmPassword !== password ? "Passwords do not match." : null;
+  const isEmailValid = email.length > 0 && !emailError;
+  const isPhoneValid = phoneNumber.length > 0 && !phoneError;
+  const isConfirmValid = confirmPassword.length > 0 && !confirmError;
+
   const handleSignUp = async () => {
     setValidationError(null);
     clearError();
@@ -29,16 +57,24 @@ export default function SignUpPage() {
       return;
     }
 
-    if (password !== confirmPassword) {
-      setValidationError("Passwords do not match.");
+    if (!isValidEmail(email)) {
+      setValidationError("Enter a valid email address.");
       return;
     }
 
-    // Backend validation: ^\+?[1-9]\d{1,14}$
     const cleanPhone = phoneNumber.replace(/\s+/g, "");
-    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    if (!phoneRegex.test(cleanPhone)) {
+    if (!isValidPhone(cleanPhone)) {
       setValidationError("Enter a valid phone number (e.g. +1234567890 or 923001234567).");
+      return;
+    }
+
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setValidationError(`Password must be at least ${MIN_PASSWORD_LENGTH} characters.`);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setValidationError("Passwords do not match.");
       return;
     }
 
@@ -72,111 +108,128 @@ export default function SignUpPage() {
         </View>
 
         {displayError && (
-          <View style={styles.errorAlert}>
+          <Animated.View entering={FadeInDown.duration(200)} exiting={FadeOutUp.duration(200)} style={styles.errorAlert}>
             <Text style={styles.errorAlertText}>{displayError}</Text>
-          </View>
+          </Animated.View>
         )}
 
         <View style={styles.inputGroup}>
           {/* Full Name */}
-          <View style={styles.inputWrapper}>
-            <User size={20} color={focused === "name" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-            <TextInput
-              placeholder="Full Name"
-              placeholderTextColor="#7e828d"
-              value={fullName}
-              onChangeText={setFullName}
-              style={styles.input}
-              autoCapitalize="words"
-              onFocus={() => setFocused("name")}
-              onBlur={() => setFocused(null)}
-              selectionColor="#14ed9e"
-              autoComplete="off"
-              importantForAutofill="no"
-              blurOnSubmit={false}
-            />
+          <View style={styles.fieldBlock}>
+            <View style={styles.inputWrapper}>
+              <User size={20} color={focused === "name" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+              <TextInput
+                placeholder="Full Name"
+                placeholderTextColor="#7e828d"
+                value={fullName}
+                onChangeText={setFullName}
+                style={styles.input}
+                autoCapitalize="words"
+                onFocus={() => setFocused("name")}
+                onBlur={() => setFocused(null)}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+              />
+            </View>
           </View>
 
           {/* Email */}
-          <View style={styles.inputWrapper}>
-            <Mail size={20} color={focused === "email" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-            <TextInput
-              placeholder="Email address"
-              placeholderTextColor="#7e828d"
-              value={email}
-              onChangeText={setEmail}
-              style={styles.input}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              onFocus={() => setFocused("email")}
-              onBlur={() => setFocused(null)}
-              selectionColor="#14ed9e"
-              autoComplete="off"
-              importantForAutofill="no"
-              blurOnSubmit={false}
-            />
+          <View style={styles.fieldBlock}>
+            <View style={[styles.inputWrapper, emailError && styles.inputWrapperError]}>
+              <Mail size={20} color={emailError ? "#f52222" : focused === "email" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+              <TextInput
+                placeholder="Email address"
+                placeholderTextColor="#7e828d"
+                value={email}
+                onChangeText={setEmail}
+                style={styles.input}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onFocus={() => setFocused("email")}
+                onBlur={() => setFocused(null)}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+              />
+              {isEmailValid && <CheckCircle2 size={18} color="#14ed9e" />}
+            </View>
+            {emailError && <Text style={styles.fieldErrorText}>{emailError}</Text>}
           </View>
 
           {/* Phone Number */}
-          <View style={styles.inputWrapper}>
-            <Phone size={20} color={focused === "phone" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-            <TextInput
-              placeholder="Phone Number (e.g. +923123456789)"
-              placeholderTextColor="#7e828d"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              style={styles.input}
-              keyboardType="phone-pad"
-              onFocus={() => setFocused("phone")}
-              onBlur={() => setFocused(null)}
-              selectionColor="#14ed9e"
-              autoComplete="off"
-              importantForAutofill="no"
-              blurOnSubmit={false}
-            />
+          <View style={styles.fieldBlock}>
+            <View style={[styles.inputWrapper, phoneError && styles.inputWrapperError]}>
+              <Phone size={20} color={phoneError ? "#f52222" : focused === "phone" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+              <TextInput
+                placeholder="Phone Number (e.g. +923123456789)"
+                placeholderTextColor="#7e828d"
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                style={styles.input}
+                keyboardType="phone-pad"
+                onFocus={() => setFocused("phone")}
+                onBlur={() => setFocused(null)}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+              />
+              {isPhoneValid && <CheckCircle2 size={18} color="#14ed9e" />}
+            </View>
+            {phoneError && <Text style={styles.fieldErrorText}>{phoneError}</Text>}
           </View>
 
           {/* Password */}
-          <View style={styles.inputWrapper}>
-            <Lock size={20} color={focused === "password" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor="#7e828d"
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-              secureTextEntry
-              onFocus={() => setFocused("password")}
-              onBlur={() => setFocused(null)}
-              selectionColor="#14ed9e"
-              autoComplete="off"
-              importantForAutofill="no"
-              blurOnSubmit={false}
-            />
+          <View style={styles.fieldBlock}>
+            <View style={styles.inputWrapper}>
+              <Lock size={20} color={focused === "password" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+              <TextInput
+                placeholder="Password"
+                placeholderTextColor="#7e828d"
+                value={password}
+                onChangeText={setPassword}
+                style={styles.input}
+                secureTextEntry
+                onFocus={() => setFocused("password")}
+                onBlur={() => setFocused(null)}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+              />
+            </View>
+            <PasswordStrengthMeter password={password} />
           </View>
 
           {/* Confirm Password */}
-          <View style={styles.inputWrapper}>
-            <Lock size={20} color={focused === "confirm" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
-            <TextInput
-              placeholder="Confirm Password"
-              placeholderTextColor="#7e828d"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              style={styles.input}
-              secureTextEntry
-              onFocus={() => setFocused("confirm")}
-              onBlur={() => setFocused(null)}
-              selectionColor="#14ed9e"
-              autoComplete="off"
-              importantForAutofill="no"
-              blurOnSubmit={false}
-            />
+          <View style={styles.fieldBlock}>
+            <View style={[styles.inputWrapper, confirmError && styles.inputWrapperError]}>
+              <Lock size={20} color={confirmError ? "#f52222" : focused === "confirm" ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
+              <TextInput
+                placeholder="Confirm Password"
+                placeholderTextColor="#7e828d"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                style={styles.input}
+                secureTextEntry
+                onFocus={() => setFocused("confirm")}
+                onBlur={() => setFocused(null)}
+                selectionColor="#14ed9e"
+                autoComplete="off"
+                importantForAutofill="no"
+                blurOnSubmit={false}
+              />
+              {isConfirmValid && <CheckCircle2 size={18} color="#14ed9e" />}
+            </View>
+            {confirmError && <Text style={styles.fieldErrorText}>{confirmError}</Text>}
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={styles.submitButton} 
+        <TouchableOpacity
+          style={styles.submitButton}
           onPress={handleSignUp}
           disabled={loading}
         >
@@ -205,12 +258,12 @@ export default function SignUpPage() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0d0e12" },
-  scrollContent: { 
-    flexGrow: 1, 
-    paddingHorizontal: 24, 
-    justifyContent: "center", 
-    paddingTop: 80, 
-    paddingBottom: 40 
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    justifyContent: "center",
+    paddingTop: 80,
+    paddingBottom: 40
   },
   formContainer: { width: "100%" },
   header: { alignItems: "center", marginBottom: 32 },
@@ -219,12 +272,14 @@ const styles = StyleSheet.create({
   title: { fontSize: 28, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_700Bold" },
   subtitle: { fontSize: 14, color: "#7e828d", marginTop: 8, fontFamily: "Manrope_400Regular" },
   inputGroup: { gap: 16 },
+  fieldBlock: { gap: 0 },
   inputWrapper: { flexDirection: "row", alignItems: "center", backgroundColor: "#23242f", borderRadius: 12, borderWidth: 1, borderColor: "#24252e", paddingHorizontal: 16, height: 56 },
   inputWrapperFocused: { borderColor: "#14ed9e", shadowColor: "#14ed9e", shadowOpacity: 0.15, shadowRadius: 10, elevation: 4 },
+  inputWrapperError: { borderColor: "#f52222" },
   inputIcon: { marginRight: 12 },
-  input: { 
-    flex: 1, 
-    color: "#fcfcfc", 
+  input: {
+    flex: 1,
+    color: "#fcfcfc",
     fontSize: 15,
     // @ts-ignore
     outlineWidth: 0,
@@ -232,6 +287,13 @@ const styles = StyleSheet.create({
     outlineStyle: 'none',
     borderWidth: 0,
     fontFamily: "Manrope_400Regular"
+  },
+  fieldErrorText: {
+    color: "#f52222",
+    fontSize: 12,
+    fontFamily: "Manrope_500Medium",
+    marginTop: 6,
+    marginLeft: 4,
   },
   submitButton: { backgroundColor: "#14ed9e", height: 56, borderRadius: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 32, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 10 },
   submitText: { color: "#0d0e12", fontSize: 16, fontWeight: "600", fontFamily: "Manrope_700Bold" },
