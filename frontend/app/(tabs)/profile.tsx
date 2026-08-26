@@ -2,6 +2,7 @@ import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from "react-nati
 import { useRouter } from "expo-router";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { Shield, Bell, CreditCard, HelpCircle, LogOut, ChevronRight, Settings } from "lucide-react-native";
+import { useAuth } from "../../context/AuthContext";
 
 const menuItems = [
   { icon: Shield, label: "Security & Privacy", color: "#14ed9e", route: null },
@@ -13,6 +14,15 @@ const menuItems = [
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  const initials = user?.fullName
+    ? user.fullName
+        .split(" ")
+        .map((name) => name[0])
+        .join("")
+        .toUpperCase()
+    : "SS";
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
@@ -20,10 +30,14 @@ export default function ProfilePage() {
       {/* Avatar */}
       <Animated.View entering={FadeInUp.duration(400)} style={styles.avatarContainer}>
         <View style={styles.avatarBubble}>
-          <Text style={styles.avatarText}>SS</Text>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
-        <Text style={styles.name}>Shahzaib Sajjad</Text>
-        <Text style={styles.email}>sp23bsse0080@maju.edu.pk</Text>
+        <Text style={styles.name}>
+          {user?.fullName || "Shahzaib Sajjad"}
+        </Text>
+        <Text style={styles.email}>
+          {user?.email || "sp23bsse0080@maju.edu.pk"}
+        </Text>
       </Animated.View>
 
       {/* Stats */}

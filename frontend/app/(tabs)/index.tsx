@@ -1,11 +1,13 @@
 import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { TrendingDown, AlertTriangle, Sparkles } from "lucide-react-native";
+import { TrendingDown, AlertTriangle, Sparkles, Wallet } from "lucide-react-native";
 import { subscriptions, totalMonthly, alerts } from "../../constants/mockData";
+import { useAuth } from "../../context/AuthContext";
 
 export default function HomePage() {
   const router = useRouter();
+  const { user, walletBalance } = useAuth();
   
   const activeCount = subscriptions.filter((s) => s.status === "active").length;
   const flaggedCount = alerts.filter((a) => !a.read).length;
@@ -14,13 +16,15 @@ export default function HomePage() {
     .sort((a, b) => new Date(a.nextPayment).getTime() - new Date(b.nextPayment).getTime())
     .slice(0, 4);
 
+  const firstName = user?.fullName ? user.fullName.split(" ")[0] : "Shahzaib";
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
       
       {/* Header */}
       <Animated.View entering={FadeInUp.duration(400).delay(100)} style={styles.header}>
         <Text style={styles.greetingText}>Good morning,</Text>
-        <Text style={styles.nameText}>Shahzaib 👋</Text>
+        <Text style={styles.nameText}>{firstName} 👋</Text>
       </Animated.View>
 
       {/* Total Spend Card */}
@@ -31,6 +35,7 @@ export default function HomePage() {
           <Text style={styles.totalText}>${totalMonthly.toFixed(2)}</Text>
           <Text style={styles.moText}>/mo</Text>
         </View>
+        
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
             <View style={[styles.dot, { backgroundColor: "#14ed9e" }]} />
@@ -41,6 +46,20 @@ export default function HomePage() {
             <Text style={styles.badgeText}>{flaggedCount} alerts</Text>
           </View>
         </View>
+
+        <View style={styles.cardDivider} />
+
+        <TouchableOpacity 
+          style={styles.walletBalanceRow}
+          onPress={() => router.push("/(tabs)/wallet")}
+          activeOpacity={0.8}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Wallet size={16} color="#14ed9e" />
+            <Text style={styles.walletBalanceLabel}>WALLET BALANCE</Text>
+          </View>
+          <Text style={styles.walletBalanceValue}>${walletBalance.toFixed(2)}</Text>
+        </TouchableOpacity>
       </Animated.View>
 
       {/* Quick Stats */}
@@ -150,5 +169,9 @@ const styles = StyleSheet.create({
   logoBox: { width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   subName: { color: "#fcfcfc", fontSize: 14, fontWeight: "600", marginBottom: 2, fontFamily: "Manrope_600SemiBold" },
   subDate: { color: "#7e828d", fontSize: 12, fontFamily: "Manrope_400Regular" },
-  subAmount: { color: "#fcfcfc", fontSize: 14, fontWeight: "bold", fontFamily: "Manrope_700Bold" }
+  subAmount: { color: "#fcfcfc", fontSize: 14, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
+  cardDivider: { height: 1, backgroundColor: "#22232d", marginVertical: 16 },
+  walletBalanceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  walletBalanceLabel: { color: "#7e828d", fontSize: 10, fontFamily: "Manrope_800ExtraBold", letterSpacing: 1 },
+  walletBalanceValue: { color: "#fcfcfc", fontSize: 16, fontFamily: "Manrope_700Bold" }
 });

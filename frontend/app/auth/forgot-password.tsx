@@ -1,17 +1,39 @@
 import { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { Mail, ArrowRight, ArrowLeft } from "lucide-react-native";
 
 import KeyboardAvoidingWrapper from "../../components/KeyboardAvoidingWrapper";
+import { authApi } from "../../services/api";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
   const [focused, setFocused] = useState<boolean>(false);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleReset = () => {
-    router.replace("/auth/login");
+  const handleReset = async () => {
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    if (!email.trim()) {
+      setErrorMessage("Please enter your email address.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await authApi.forgotPassword({ email: email.trim() });
+      setSuccessMessage(
+        "If an account exists for that email address, a reset link has been sent. Check your inbox and spam folder."
+      );
+    } catch (error: any) {
+      setErrorMessage(error?.message || "Unable to send reset link. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,18 +56,18 @@ export default function ForgotPasswordPage() {
         </View>
 
         <View style={styles.inputGroup}>
-          <View style={styles.inputWrapper}>
+          <View style={[styles.inputWrapper, focused && styles.inputWrapperFocused]}>
             <Mail size={20} color={focused ? "#14ed9e" : "#7e828d"} style={styles.inputIcon} />
             <TextInput
               placeholder="Email address"
               placeholderTextColor="#7e828d"
+              value={email}
+              onChangeText={setEmail}
               style={styles.input}
               keyboardType="email-address"
               autoCapitalize="none"
-              onFocus={() => {
-                setTimeout(() => setFocused(true), 50);
-              }}
-              onBlur={() => {}}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
               selectionColor="#14ed9e"
               autoComplete="off"
               importantForAutofill="no"
@@ -54,9 +76,27 @@ export default function ForgotPasswordPage() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleReset}>
-          <Text style={styles.submitText}>Send Reset Link</Text>
-          <ArrowRight size={18} color="#0d0e12" />
+        {errorMessage ? (
+          <View style={styles.errorAlert}>
+            <Text style={styles.errorAlertText}>{errorMessage}</Text>
+          </View>
+        ) : null}
+
+        {successMessage ? (
+          <View style={styles.successAlert}>
+            <Text style={styles.successAlertText}>{successMessage}</Text>
+          </View>
+        ) : null}
+
+        <TouchableOpacity style={styles.submitButton} onPress={handleReset} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator color="#0d0e12" />
+          ) : (
+            <>
+              <Text style={styles.submitText}>Send Reset Link</Text>
+              <ArrowRight size={18} color="#0d0e12" />
+            </>
+          )}
         </TouchableOpacity>
 
       </View>
@@ -96,5 +136,35 @@ const styles = StyleSheet.create({
     fontFamily: "Manrope_400Regular"
   },
   submitButton: { backgroundColor: "#14ed9e", height: 56, borderRadius: 12, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 24, shadowColor: "#14ed9e", shadowOpacity: 0.3, shadowRadius: 10 },
-  submitText: { color: "#0d0e12", fontSize: 16, fontWeight: "600", fontFamily: "Manrope_700Bold" }
+  submitText: { color: "#0d0e12", fontSize: 16, fontWeight: "600", fontFamily: "Manrope_700Bold" },
+  errorAlert: {
+    backgroundColor: "rgba(245, 34, 34, 0.15)",
+    borderWidth: 1,
+    borderColor: "#f52222",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    width: "100%",
+  },
+  errorAlertText: {
+    color: "#ff4e83",
+    fontSize: 14,
+    fontFamily: "Manrope_500Medium",
+    textAlign: "center",
+  },
+  successAlert: {
+    backgroundColor: "rgba(20, 237, 158, 0.16)",
+    borderWidth: 1,
+    borderColor: "#14ed9e",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    width: "100%",
+  },
+  successAlertText: {
+    color: "#d1ffd6",
+    fontSize: 14,
+    fontFamily: "Manrope_500Medium",
+    textAlign: "center",
+  }
 });

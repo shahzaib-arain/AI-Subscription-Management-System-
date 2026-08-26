@@ -24,6 +24,22 @@ const KeyboardAvoidingWrapper: React.FC<KeyboardAvoidingWrapperProps> = ({
   contentContainerStyle,
   keyboardVerticalOffset = Platform.OS === 'ios' ? 0 : 20,
 }) => {
+  // On web, KeyboardAvoidingView and Keyboard.dismiss are not needed
+  // and TouchableWithoutFeedback causes inputs to immediately blur on click
+  if (Platform.OS === 'web') {
+    return (
+      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.scrollContent, contentContainerStyle]}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.innerContainer}>{children}</View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView
