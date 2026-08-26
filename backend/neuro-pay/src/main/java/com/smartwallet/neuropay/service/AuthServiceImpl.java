@@ -36,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final VirtualCardService virtualCardService;
     private final MailService mailService;
+    private final WalletService walletService;
 
     @Value("${application.frontend-url}")
     private String frontendUrl;
@@ -65,6 +66,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userRepository.save(user);
+        walletService.createWalletForUser(user);
 
         // Send welcome email asynchronously
         mailService.sendWelcomeEmail(user.getEmail(), user.getFullName(), virtualCardNumber);
