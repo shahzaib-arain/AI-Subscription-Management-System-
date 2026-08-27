@@ -42,7 +42,12 @@ export default function HomePage() {
       {/* Total Spend Card */}
       <Animated.View entering={FadeInUp.duration(400).delay(200)} style={styles.spendCard}>
         <View style={styles.blurCircle} />
-        <Text style={styles.cardLabel}>MONTHLY SUBSCRIPTIONS</Text>
+        <View style={styles.spendCardHeader}>
+          <Text style={styles.cardLabel}>MONTHLY SUBSCRIPTIONS</Text>
+          <TouchableOpacity onPress={() => router.push("/analytics")} hitSlop={8}>
+            <Text style={styles.analyticsLink}>View Analytics</Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.spendRow}>
           <Text style={styles.totalText}>${totalMonthly.toFixed(2)}</Text>
           <Text style={styles.moText}>/mo</Text>
@@ -158,7 +163,9 @@ const styles = StyleSheet.create({
 
   spendCard: { backgroundColor: "#15161d", borderRadius: 24, padding: 24, paddingBottom: 20, borderWidth: 1, borderColor: "#24252e", shadowColor: "#000", shadowOpacity: 0.5, shadowRadius: 10, elevation: 5, overflow: "hidden", marginBottom: 16 },
   blurCircle: { position: "absolute", top: -40, right: -40, width: 150, height: 150, borderRadius: 75, backgroundColor: "rgba(20, 237, 158, 0.15)" },
+  spendCardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   cardLabel: { color: "#7e828d", fontSize: 10, fontWeight: "bold", letterSpacing: 1, fontFamily: "Manrope_800ExtraBold" },
+  analyticsLink: { color: "#14ed9e", fontSize: 11, fontFamily: "Manrope_600SemiBold" },
   spendRow: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginTop: 12, marginBottom: 20 },
   totalText: { color: "#14ed9e", fontSize: 40, fontWeight: "bold", fontFamily: "Manrope_800ExtraBold" },
   moText: { color: "#7e828d", fontSize: 14, marginBottom: 8, fontFamily: "Manrope_400Regular" },

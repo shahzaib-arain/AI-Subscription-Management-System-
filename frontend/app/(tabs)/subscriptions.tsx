@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScrollView, View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { Search } from "lucide-react-native";
+import { Search, Plus } from "lucide-react-native";
 import { useSubscriptions } from "../../context/SubscriptionsContext";
 import { statusColor, statusLabel, FALLBACK_MERCHANT_EMOJI } from "../../utils/subscription";
 
@@ -61,7 +61,13 @@ export default function SubscriptionsPage() {
       contentContainerStyle={styles.scrollContent}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#14ed9e" />}
     >
-      <Text style={styles.title}>Subscriptions</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Subscriptions</Text>
+        <TouchableOpacity style={styles.browseButton} onPress={() => router.push("/marketplace")}>
+          <Plus size={16} color="#0d0e12" strokeWidth={3} />
+          <Text style={styles.browseButtonText}>Browse Plans</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Search */}
       <View style={styles.searchBox}>
@@ -137,7 +143,10 @@ const styles = StyleSheet.create({
   errorStateText: { color: "#7e828d", fontSize: 14, textAlign: "center", fontFamily: "Manrope_500Medium" },
   retryButton: { backgroundColor: "#14ed9e", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
   retryButtonText: { color: "#0d0e12", fontSize: 14, fontFamily: "Manrope_700Bold" },
-  title: { fontSize: 24, fontWeight: "bold", color: "#fcfcfc", marginBottom: 20, fontFamily: "Manrope_800ExtraBold" },
+  title: { fontSize: 24, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_800ExtraBold" },
+  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20 },
+  browseButton: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#14ed9e", paddingHorizontal: 14, paddingVertical: 9, borderRadius: 20 },
+  browseButtonText: { color: "#0d0e12", fontSize: 12, fontFamily: "Manrope_700Bold" },
 
   searchBox: { flexDirection: "row", alignItems: "center", backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 12, paddingHorizontal: 16, height: 48, marginBottom: 16 },
   searchInput: { flex: 1, color: "#fcfcfc", marginLeft: 12, fontSize: 14, fontFamily: "Manrope_400Regular" },

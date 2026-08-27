@@ -34,7 +34,7 @@ public class BudgetCapService {
 
         BigDecimal totalMonthly = subscriptions.stream()
                 .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE || s.getStatus() == SubscriptionStatus.FLAGGED)
-                .map(this::monthlyEquivalent)
+                .map(s -> s.getBillingCycle().toMonthlyEquivalent(s.getAmount()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         if (totalMonthly.compareTo(cap) <= 0) {
@@ -51,17 +51,5 @@ public class BudgetCapService {
                 "Monthly budget exceeded",
                 String.format("Your active subscriptions now total $%s/mo, over your $%s/mo budget.",
                         totalMonthly.setScale(2, RoundingMode.HALF_UP), cap.setScale(2, RoundingMode.HALF_UP)));
-    }
-
-    // Mirrors the same cycle-normalization used on the frontend
-    // (utils/subscription.ts:monthlyEquivalent) — kept in sync by convention
-    // since Java and TypeScript can't share this logic directly.
-    private BigDecimal monthlyEquivalent(Subscription subscription) {
-        BigDecimal amount = subscription.getAmount();
-        return switch (subscription.getBillingCycle()) {
-            case WEEKLY -> amount.multiply(BigDecimal.valueOf(52)).divide(BigDecimal.valueOf(12), 4, RoundingMode.HALF_UP);
-            case MONTHLY -> amount;
-            case YEARLY -> amount.divide(BigDecimal.valueOf(12), 4, RoundingMode.HALF_UP);
-        };
     }
 }

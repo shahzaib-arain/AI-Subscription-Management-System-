@@ -35,6 +35,24 @@ export function cycleLabel(cycle: string): string {
 /** A generic stand-in for merchants the backend hasn't matched a logo for. */
 export const FALLBACK_MERCHANT_EMOJI = "💳";
 
+const CATEGORY_COLORS: Record<string, string> = {
+  Entertainment: "#f52222",
+  Music: "#14ed9e",
+  Cloud: "#ffb020",
+  Design: "#a96df5",
+  "AI Tools": "#4e83ff",
+  Storage: "#2dd4bf",
+};
+const CATEGORY_FALLBACK_COLORS = ["#f57f9e", "#7ee787", "#f5a623", "#6ee7f5"];
+
+/** Deterministic color per category — same category always reads the same color across screens. */
+export function categoryColor(category: string): string {
+  if (CATEGORY_COLORS[category]) return CATEGORY_COLORS[category];
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) hash = (hash * 31 + category.charCodeAt(i)) >>> 0;
+  return CATEGORY_FALLBACK_COLORS[hash % CATEGORY_FALLBACK_COLORS.length];
+}
+
 const CYCLE_TO_MONTHLY_FACTOR: Record<string, number> = {
   WEEKLY: 52 / 12,
   MONTHLY: 1,

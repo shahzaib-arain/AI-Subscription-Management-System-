@@ -73,6 +73,12 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(ex.getMessage()));
     }
 
+    @ExceptionHandler(WalletOperationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleWalletOperation(WalletOperationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
+
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<ApiResponse<Void>> handleInvalidToken(InvalidTokenException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

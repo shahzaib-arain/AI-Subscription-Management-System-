@@ -8,6 +8,7 @@ import com.smartwallet.neuropay.entity.User;
 import com.smartwallet.neuropay.entity.Wallet;
 import com.smartwallet.neuropay.entity.WalletTransaction;
 import com.smartwallet.neuropay.enums.WalletTransactionType;
+import com.smartwallet.neuropay.exception.WalletOperationException;
 import com.smartwallet.neuropay.repository.WalletRepository;
 import com.smartwallet.neuropay.repository.WalletTransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -101,6 +102,27 @@ public class WalletServiceImpl implements WalletService {
                 .toList();
 
         return ApiResponse.success("Transactions retrieved successfully.", transactions);
+    }
+
+    @Override
+    @Transactional
+    public Wallet charge(User user, BigDecimal amount, String description) {
+        Wallet wallet = getOrCreateWallet(user);
+
+        if (wallet.isFrozen()) {
+            throw new WalletOperationException("Your wallet is frozen. Unfreeze it before making a purchase.");
+        }
+        if (wallet.getBalance().compareTo(amount) < 0) {
+            throw new WalletOperationException("Insufficient balance. Add funds to your wallet and try again.");
+        }
+
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+        walletRepository.save(wallet);
+
+        recordLedgerEntry(wallet, WalletTransactionType.CHARGE, amount, description);
+
+        log.info("User {} charged {} — {}", user.getEmail(), amount, description);
+        return wallet;
     }
 
     // --- shared helpers — every public method above routes through these,

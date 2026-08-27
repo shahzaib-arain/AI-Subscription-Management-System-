@@ -7,6 +7,7 @@ import com.smartwallet.neuropay.entity.Subscription;
 import com.smartwallet.neuropay.entity.User;
 import com.smartwallet.neuropay.enums.SubscriptionStatus;
 import com.smartwallet.neuropay.exception.ResourceNotFoundException;
+import com.smartwallet.neuropay.mapper.SubscriptionMapper;
 import com.smartwallet.neuropay.repository.SubscriptionRepository;
 import com.smartwallet.neuropay.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<Subscription> subscriptions = subscriptionRepository.findByUserIdOrderByNextPaymentDateAsc(user.getId());
         budgetCapService.checkAndFlag(user, subscriptions);
 
-        List<SubscriptionResponse> response = subscriptions.stream().map(this::toResponse).toList();
+        List<SubscriptionResponse> response = subscriptions.stream().map(SubscriptionMapper::toResponse).toList();
         return ApiResponse.success("Subscriptions retrieved successfully.", response);
     }
 
@@ -81,7 +82,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         Subscription subscription = findOwnedSubscription(user, subscriptionId);
         subscription.setStatus(status);
         subscription = subscriptionRepository.save(subscription);
-        return ApiResponse.success(message, toResponse(subscription));
+        return ApiResponse.success(message, SubscriptionMapper.toResponse(subscription));
     }
 
     private Subscription findOwnedSubscription(User user, Long subscriptionId) {
@@ -93,19 +94,5 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new ResourceNotFoundException("Subscription not found.");
         }
         return subscription;
-    }
-
-    private SubscriptionResponse toResponse(Subscription subscription) {
-        return SubscriptionResponse.builder()
-                .id(subscription.getId())
-                .merchantName(subscription.getMerchant() != null ? subscription.getMerchant().getName() : "Unknown")
-                .logoEmoji(subscription.getMerchant() != null ? subscription.getMerchant().getLogoEmoji() : null)
-                .amount(subscription.getAmount())
-                .currency(subscription.getCurrency())
-                .billingCycle(subscription.getBillingCycle().name())
-                .nextPaymentDate(subscription.getNextPaymentDate())
-                .status(subscription.getStatus().name())
-                .category(subscription.getCategory())
-                .build();
     }
 }

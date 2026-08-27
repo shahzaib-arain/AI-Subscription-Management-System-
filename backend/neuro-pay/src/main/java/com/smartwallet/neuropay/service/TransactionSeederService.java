@@ -4,7 +4,6 @@ import com.smartwallet.neuropay.entity.Merchant;
 import com.smartwallet.neuropay.entity.Transaction;
 import com.smartwallet.neuropay.entity.User;
 import com.smartwallet.neuropay.enums.TransactionSource;
-import com.smartwallet.neuropay.repository.MerchantRepository;
 import com.smartwallet.neuropay.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +24,7 @@ import java.util.List;
 public class TransactionSeederService {
 
     private final TransactionRepository transactionRepository;
-    private final MerchantRepository merchantRepository;
+    private final MerchantService merchantService;
 
     public void seedTransactionsForUser(User user) {
         LocalDateTime now = LocalDateTime.now();
@@ -46,7 +45,7 @@ public class TransactionSeederService {
         rows.addAll(recurringSeries(user, now, "Figma", "✏️", "Design", "15.00", 4, 30, 50));
 
         // A single unrecognized charge that never repeats — should read as suspicious.
-        Merchant unknown = getOrCreateMerchant("XZMedia", null, null);
+        Merchant unknown = merchantService.getOrCreate("XZMedia", null, null);
         rows.add(buildTransaction(user, unknown, "29.99", "XZMedia*ONETIME", now.minusHours(5)));
 
         transactionRepository.saveAll(rows);
@@ -56,7 +55,7 @@ public class TransactionSeederService {
     private List<Transaction> recurringSeries(User user, LocalDateTime now, String merchantName, String emoji,
                                                String category, String amount, int occurrences, int intervalDays,
                                                int mostRecentOffsetDays) {
-        Merchant merchant = getOrCreateMerchant(merchantName, emoji, category);
+        Merchant merchant = merchantService.getOrCreate(merchantName, emoji, category);
         List<Transaction> rows = new ArrayList<>();
         for (int i = 0; i < occurrences; i++) {
             LocalDateTime date = now.minusDays(mostRecentOffsetDays + (long) i * intervalDays);
@@ -68,7 +67,7 @@ public class TransactionSeederService {
     private List<Transaction> priceIncreaseSeries(User user, LocalDateTime now, String merchantName, String emoji,
                                                    String category, String oldAmount, String newAmount,
                                                    int intervalDays, int oldOccurrences) {
-        Merchant merchant = getOrCreateMerchant(merchantName, emoji, category);
+        Merchant merchant = merchantService.getOrCreate(merchantName, emoji, category);
         List<Transaction> rows = new ArrayList<>();
         LocalDateTime latestDate = now.minusDays(2);
         rows.add(buildTransaction(user, merchant, newAmount, merchantDescription(merchantName, latestDate), latestDate));
@@ -93,11 +92,5 @@ public class TransactionSeederService {
 
     private String merchantDescription(String merchantName, LocalDateTime date) {
         return merchantName.toUpperCase().replace(" ", "") + "*" + (1000 + date.getDayOfYear());
-    }
-
-    private Merchant getOrCreateMerchant(String name, String emoji, String category) {
-        return merchantRepository.findByNameIgnoreCase(name)
-                .orElseGet(() -> merchantRepository.save(
-                        Merchant.builder().name(name).logoEmoji(emoji).category(category).build()));
     }
 }

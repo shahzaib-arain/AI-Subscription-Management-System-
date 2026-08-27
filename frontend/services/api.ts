@@ -235,6 +235,46 @@ export const userApi = {
     }),
 };
 
+export interface PlanData {
+  id: number;
+  merchantName: string;
+  logoEmoji: string | null;
+  category: string | null;
+  planName: string;
+  description: string | null;
+  price: number;
+  currency: string;
+  billingCycle: string;
+  popular: boolean;
+}
+
+export const marketplaceApi = {
+  getPlans: (token: string) => authorizedRequest<PlanData[]>("/marketplace/plans", token),
+
+  subscribe: (token: string, planId: number) =>
+    authorizedRequest<SubscriptionData>(`/marketplace/plans/${planId}/subscribe`, token, { method: "POST" }),
+};
+
+export interface CategorySpendData {
+  category: string;
+  monthlyAmount: number;
+}
+
+export interface MonthlySpendData {
+  month: string;
+  totalSpend: number;
+}
+
+export interface SpendAnalyticsData {
+  categoryBreakdown: CategorySpendData[];
+  monthlyTrend: MonthlySpendData[];
+  projectedNextMonth: number;
+}
+
+export const analyticsApi = {
+  getSummary: (token: string) => authorizedRequest<SpendAnalyticsData>("/analytics/summary", token),
+};
+
 export const authApi = {
   signUp: (params: SignUpParams) => 
     request<AuthResponseData>("/auth/signup", {

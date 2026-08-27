@@ -82,7 +82,7 @@ public class DetectionService {
         Transaction earliest = group.get(group.size() - 1);
 
         BillingCycle cycle = inferCycle(group);
-        LocalDate nextPaymentDate = latest.getTransactionDate().toLocalDate().plusDays(cycleLengthDays(cycle));
+        LocalDate nextPaymentDate = latest.getTransactionDate().toLocalDate().plusDays(cycle.lengthInDays());
         boolean priceIncreased = isSignificantIncrease(previous.getAmount(), latest.getAmount());
 
         Subscription subscription = subscriptionRepository.save(Subscription.builder()
@@ -152,13 +152,5 @@ public class DetectionService {
         if (avgDays <= 14) return BillingCycle.WEEKLY;
         if (avgDays <= 200) return BillingCycle.MONTHLY;
         return BillingCycle.YEARLY;
-    }
-
-    private int cycleLengthDays(BillingCycle cycle) {
-        return switch (cycle) {
-            case WEEKLY -> 7;
-            case MONTHLY -> 30;
-            case YEARLY -> 365;
-        };
     }
 }
