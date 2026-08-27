@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { Platform } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   authApi,
   walletApi,
@@ -37,37 +37,33 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const isWeb = Platform.OS === "web";
-
+// AsyncStorage works identically on web, Android, and iOS — replacing the
+// previous localStorage-only shim that silently no-opped on native, which
+// meant a session (and everything gated behind it, including the wallet)
+// never survived an app restart on a real phone.
 const safeStorage = {
   getItem: async (key: string): Promise<string | null> => {
     try {
-      if (isWeb && typeof window !== "undefined" && window.localStorage) {
-        return window.localStorage.getItem(key);
-      }
+      return await AsyncStorage.getItem(key);
     } catch (e) {
       console.warn("Storage read error:", e);
+      return null;
     }
-    return null;
   },
   setItem: async (key: string, value: string): Promise<void> => {
     try {
-      if (isWeb && typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.setItem(key, value);
-      }
+      await AsyncStorage.setItem(key, value);
     } catch (e) {
       console.warn("Storage write error:", e);
     }
   },
   removeItem: async (key: string): Promise<void> => {
     try {
-      if (isWeb && typeof window !== "undefined" && window.localStorage) {
-        window.localStorage.removeItem(key);
-      }
+      await AsyncStorage.removeItem(key);
     } catch (e) {
       console.warn("Storage remove error:", e);
     }
-  }
+  },
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

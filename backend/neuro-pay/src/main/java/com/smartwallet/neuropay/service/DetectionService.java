@@ -135,13 +135,15 @@ public class DetectionService {
                         merchant.getName(), previousAmount, latestAmount, percent.setScale(0, RoundingMode.HALF_UP)));
     }
 
-    private boolean isSignificantIncrease(BigDecimal previousAmount, BigDecimal latestAmount) {
+    // Package-private (not private) so DetectionServiceTest can exercise the
+    // rule thresholds directly instead of only through the full pipeline.
+    boolean isSignificantIncrease(BigDecimal previousAmount, BigDecimal latestAmount) {
         if (latestAmount.compareTo(previousAmount) <= 0) return false;
         BigDecimal ratio = latestAmount.subtract(previousAmount).divide(previousAmount, 4, RoundingMode.HALF_UP);
         return ratio.compareTo(PRICE_INCREASE_THRESHOLD) >= 0;
     }
 
-    private BillingCycle inferCycle(List<Transaction> group) {
+    BillingCycle inferCycle(List<Transaction> group) {
         long totalDays = 0;
         int gaps = 0;
         for (int i = 0; i < group.size() - 1; i++) {

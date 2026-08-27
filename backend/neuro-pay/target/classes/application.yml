@@ -5,13 +5,20 @@ server:
     context-path: /api/v1
 
 spring:
+  # Loads backend/neuro-pay/.env (gitignored — see .env.example) so secrets
+  # below resolve from environment variables instead of living in this
+  # tracked file. "optional:" means the app still starts fine in an
+  # environment where these are set as real OS/CI env vars instead.
+  config:
+    import: "optional:file:.env[.properties]"
+
   application:
     name: neuro-pay
 
   datasource:
     url: jdbc:postgresql://localhost:5432/neuropay_db
     username: postgres
-    password: Admin@123
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -26,8 +33,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: shahzaibarain.0080@gmail.com
-    password: uvtzwxtthnsrsqzh123   # Gmail App Password (not account password) 123 remove to access the email functionality
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}   # Gmail App Password — see .env.example for how to disable/enable
     properties:
       mail:
         smtp:
@@ -41,7 +48,7 @@ spring:
 
 application:
   jwt:
-    secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970  # 256-bit hex key
+    secret-key: ${JWT_SECRET_KEY}
     expiration: 86400000        # 24 hours in ms
     refresh-expiration: 604800000  # 7 days in ms
 
