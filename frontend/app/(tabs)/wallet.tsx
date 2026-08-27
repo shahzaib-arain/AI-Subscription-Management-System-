@@ -25,6 +25,7 @@ import { useAuth } from "../../context/AuthContext";
 import CreditCard from "../../components/ui/CreditCard";
 import { useAutoDismiss } from "../../hooks/use-auto-dismiss";
 import { WalletTransactionData } from "../../services/api";
+import { formatTimestamp } from "../../utils/date";
 
 // Ledger entry types that add money read as "in" (green, up-arrow); every
 // other type reads as "out" (red, down-arrow) — one rule, reused for both
@@ -33,20 +34,6 @@ const INFLOW_TYPES = new Set(["DEPOSIT", "REFUND"]);
 
 function isInflow(type: string) {
   return INFLOW_TYPES.has(type);
-}
-
-function formatTransactionTimestamp(iso: string): string {
-  const date = new Date(iso);
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  const isYesterday = date.toDateString() === yesterday.toDateString();
-
-  const time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  if (isToday) return `Today, ${time}`;
-  if (isYesterday) return `Yesterday, ${time}`;
-  return `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
 }
 
 function describeTransaction(item: WalletTransactionData): string {
@@ -301,7 +288,7 @@ export default function WalletPage() {
                     </View>
                     <View>
                       <Text style={styles.itemTitle}>{describeTransaction(item)}</Text>
-                      <Text style={styles.itemDate}>{formatTransactionTimestamp(item.createdAt)}</Text>
+                      <Text style={styles.itemDate}>{formatTimestamp(item.createdAt)}</Text>
                     </View>
                   </View>
                   <Text style={[styles.amount, { color }]}>

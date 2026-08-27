@@ -160,6 +160,60 @@ export const walletApi = {
     authorizedRequest<WalletTransactionData[]>("/wallet/transactions", token),
 };
 
+export interface SubscriptionData {
+  id: number;
+  merchantName: string;
+  logoEmoji: string | null;
+  amount: number;
+  currency: string;
+  billingCycle: string;
+  nextPaymentDate: string;
+  status: string;
+  category: string | null;
+}
+
+export interface AlertData {
+  id: number;
+  type: string;
+  title: string;
+  description: string;
+  severity: string;
+  subscriptionId: number | null;
+  subscriptionName: string | null;
+  read: boolean;
+  createdAt: string;
+}
+
+export interface TransactionHistoryEntry {
+  amount: number;
+  description: string;
+  transactionDate: string;
+}
+
+export const subscriptionApi = {
+  getSubscriptions: (token: string) =>
+    authorizedRequest<SubscriptionData[]>("/subscriptions", token),
+
+  pause: (token: string, id: number) =>
+    authorizedRequest<SubscriptionData>(`/subscriptions/${id}/pause`, token, { method: "PATCH" }),
+
+  resume: (token: string, id: number) =>
+    authorizedRequest<SubscriptionData>(`/subscriptions/${id}/resume`, token, { method: "PATCH" }),
+
+  cancel: (token: string, id: number) =>
+    authorizedRequest<SubscriptionData>(`/subscriptions/${id}/cancel`, token, { method: "PATCH" }),
+
+  getHistory: (token: string, id: number) =>
+    authorizedRequest<TransactionHistoryEntry[]>(`/subscriptions/${id}/history`, token),
+};
+
+export const alertApi = {
+  getAlerts: (token: string) => authorizedRequest<AlertData[]>("/alerts", token),
+
+  markRead: (token: string, id: number) =>
+    authorizedRequest<AlertData>(`/alerts/${id}/read`, token, { method: "PATCH" }),
+};
+
 export const authApi = {
   signUp: (params: SignUpParams) => 
     request<AuthResponseData>("/auth/signup", {

@@ -1,68 +1,124 @@
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { useState } from "react";
+import { ScrollView, View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { AlertTriangle, TrendingUp, Eye, Sparkles, ChevronRight } from "lucide-react-native";
-import { alerts } from "../../constants/mockData";
+import { useSubscriptions } from "../../context/SubscriptionsContext";
+import { AlertData } from "../../services/api";
+import { formatRelativeTime } from "../../utils/date";
 
-const iconMap = {
-  price_increase: TrendingUp,
-  fraud: AlertTriangle,
-  unused: Eye,
-  new_detected: Sparkles,
+const iconMap: Record<string, typeof TrendingUp> = {
+  PRICE_INCREASE: TrendingUp,
+  FRAUD: AlertTriangle,
+  UNUSED: Eye,
+  NEW_DETECTED: Sparkles,
 };
 
-const colorMap = {
-  high: { bg: "rgba(245, 34, 34, 0.15)", text: "#f52222" },
-  medium: { bg: "rgba(255, 209, 26, 0.15)", text: "#ffd11a" },
-  low: { bg: "rgba(20, 237, 158, 0.15)", text: "#14ed9e" },
+const colorMap: Record<string, { bg: string; text: string }> = {
+  HIGH: { bg: "rgba(245, 34, 34, 0.15)", text: "#f52222" },
+  MEDIUM: { bg: "rgba(255, 209, 26, 0.15)", text: "#ffd11a" },
+  LOW: { bg: "rgba(20, 237, 158, 0.15)", text: "#14ed9e" },
 };
 
 export default function AlertsPage() {
   const router = useRouter();
+  const { alerts, loading, error, refresh, markAlertRead } = useSubscriptions();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refresh();
+    setRefreshing(false);
+  };
+
+  const handlePress = async (alert: AlertData) => {
+    if (!alert.read) {
+      markAlertRead(alert.id).catch(() => {});
+    }
+    if (alert.subscriptionId) {
+      router.push(`/subscriptions/${alert.subscriptionId}` as any);
+    }
+  };
+
+  if (loading && alerts.length === 0) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator color="#14ed9e" size="large" />
+      </View>
+    );
+  }
+
+  if (error && alerts.length === 0) {
+    return (
+      <View style={[styles.container, styles.centerContent, styles.errorState]}>
+        <Text style={styles.errorStateText}>{error}</Text>
+        <TouchableOpacity style={styles.retryButton} onPress={refresh}>
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const unreadCount = alerts.filter((a) => !a.read).length;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#14ed9e" />}
+    >
       <View style={styles.headerRow}>
         <Text style={styles.title}>Fraud & Alerts</Text>
-        <View style={styles.badgeCount}>
-          <Text style={styles.badgeText}>{alerts.filter((a) => !a.read).length} new</Text>
+        {unreadCount > 0 && (
+          <View style={styles.badgeCount}>
+            <Text style={styles.badgeText}>{unreadCount} new</Text>
+          </View>
+        )}
+      </View>
+
+      {alerts.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyStateText}>No alerts — everything looks normal.</Text>
         </View>
-      </View>
+      ) : (
+        <View style={styles.list}>
+          {alerts.map((alert, i) => {
+            const Icon = iconMap[alert.type] ?? AlertTriangle;
+            const colors = colorMap[alert.severity] ?? colorMap.LOW;
 
-      <View style={styles.list}>
-        {alerts.map((alert, i) => {
-          const Icon = iconMap[alert.type as keyof typeof iconMap];
-          const colors = colorMap[alert.severity as keyof typeof colorMap];
-
-          return (
-            <Animated.View key={alert.id} entering={FadeInUp.duration(400).delay(i * 100)}>
-              <TouchableOpacity style={[styles.card, !alert.read && styles.cardUnread]}>
-                <View style={styles.cardHeader}>
-                  <View style={styles.flexRow}>
-                    <View style={[styles.iconBox, { backgroundColor: colors.bg }]}>
-                      <Icon size={16} color={colors.text} />
+            return (
+              <Animated.View key={alert.id} entering={FadeInUp.duration(400).delay(i * 100)}>
+                <TouchableOpacity
+                  style={[styles.card, !alert.read && styles.cardUnread]}
+                  onPress={() => handlePress(alert)}
+                >
+                  <View style={styles.cardHeader}>
+                    <View style={styles.flexRow}>
+                      <View style={[styles.iconBox, { backgroundColor: colors.bg }]}>
+                        <Icon size={16} color={colors.text} />
+                      </View>
+                      <View style={styles.cardTextCol}>
+                        <Text style={styles.alertTitle}>{alert.title}</Text>
+                        <Text style={styles.alertDesc}>{alert.description}</Text>
+                      </View>
                     </View>
-                    <View style={styles.cardTextCol}>
-                      <Text style={styles.alertTitle}>{alert.title}</Text>
-                      <Text style={styles.alertDesc}>{alert.description}</Text>
-                    </View>
+                    <ChevronRight size={16} color="#7e828d" style={{ marginTop: 2 }} />
                   </View>
-                  <ChevronRight size={16} color="#7e828d" style={{ marginTop: 2 }} />
-                </View>
-                
-                <View style={styles.cardFooter}>
-                  <Text style={styles.timestamp}>{alert.timestamp}</Text>
-                  {alert.severity === "high" && (
-                    <TouchableOpacity style={styles.reviewButton}>
-                      <Text style={styles.reviewText}>Review now</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          );
-        })}
-      </View>
+
+                  <View style={styles.cardFooter}>
+                    <Text style={styles.timestamp}>{formatRelativeTime(alert.createdAt)}</Text>
+                    {alert.severity === "HIGH" && (
+                      <TouchableOpacity style={styles.reviewButton} onPress={() => handlePress(alert)}>
+                        <Text style={styles.reviewText}>Review now</Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          })}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -70,10 +126,17 @@ export default function AlertsPage() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0d0e12" },
   scrollContent: { paddingHorizontal: 20, paddingTop: 64, paddingBottom: 100 },
+  centerContent: { justifyContent: "center", alignItems: "center" },
+  errorState: { paddingHorizontal: 32, gap: 16 },
+  errorStateText: { color: "#7e828d", fontSize: 14, textAlign: "center", fontFamily: "Manrope_500Medium" },
+  retryButton: { backgroundColor: "#14ed9e", paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
+  retryButtonText: { color: "#0d0e12", fontSize: 14, fontFamily: "Manrope_700Bold" },
   headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24 },
   title: { fontSize: 24, fontWeight: "bold", color: "#fcfcfc", fontFamily: "Manrope_800ExtraBold" },
   badgeCount: { backgroundColor: "rgba(245, 34, 34, 0.2)", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
   badgeText: { color: "#f52222", fontSize: 12, fontWeight: "bold", fontFamily: "Manrope_700Bold" },
+  emptyState: { backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 16, padding: 32, alignItems: "center" },
+  emptyStateText: { color: "#7e828d", fontSize: 13, fontFamily: "Manrope_400Regular", textAlign: "center" },
   list: { gap: 12 },
   card: { backgroundColor: "rgba(35, 36, 47, 0.6)", borderRadius: 16, padding: 16 },
   cardUnread: { borderWidth: 1, borderColor: "rgba(20, 237, 158, 0.2)" },

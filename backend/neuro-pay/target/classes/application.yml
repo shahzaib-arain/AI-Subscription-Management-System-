@@ -27,7 +27,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: shahzaibarain.0080@gmail.com
-    password: uvtzwxtthnsrsqzh    # Gmail App Password (not account password)
+    password: uvtzwxtthnsrsqzh123   # Gmail App Password (not account password) 123 remove to access the email functionality
     properties:
       mail:
         smtp:
