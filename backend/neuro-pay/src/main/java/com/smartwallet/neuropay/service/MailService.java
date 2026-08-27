@@ -44,6 +44,23 @@ public class MailService {
     }
 
     @Async
+    public void sendAlertEmail(String toEmail, String fullName, String title, String description) {
+        try {
+            Context context = new Context();
+            context.setVariable("name", fullName);
+            context.setVariable("title", title);
+            context.setVariable("description", description);
+
+            String htmlContent = templateEngine.process("alert-email", context);
+            sendHtmlEmail(toEmail, "NeuroPay Alert: " + title, htmlContent);
+
+            log.info("Alert email sent to: {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send alert email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    @Async
     public void sendPasswordResetEmail(String toEmail, String fullName, String resetLink) {
         try {
             Context context = new Context();

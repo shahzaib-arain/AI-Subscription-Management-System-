@@ -4,7 +4,7 @@ import Animated, { FadeInUp } from "react-native-reanimated";
 import { TrendingDown, AlertTriangle, Sparkles, Wallet } from "lucide-react-native";
 import { useAuth } from "../../context/AuthContext";
 import { useSubscriptions } from "../../context/SubscriptionsContext";
-import { monthlyEquivalent, FALLBACK_MERCHANT_EMOJI } from "../../utils/subscription";
+import { computeSpendSummary, FALLBACK_MERCHANT_EMOJI } from "../../utils/subscription";
 
 export default function HomePage() {
   const router = useRouter();
@@ -12,22 +12,11 @@ export default function HomePage() {
   const { subscriptions, alerts } = useSubscriptions();
   const walletBalanceText = wallet ? `$${wallet.balance.toFixed(2)}` : walletLoading ? "…" : "—";
 
-  const activeSubscriptions = subscriptions.filter((s) => s.status === "ACTIVE" || s.status === "FLAGGED");
   const flaggedCount = alerts.filter((a) => !a.read).length;
+  const { activeCount, totalMonthly, savedThisMonth } = computeSpendSummary(subscriptions);
 
-  const totalMonthly = activeSubscriptions.reduce(
-    (sum, s) => sum + monthlyEquivalent(s.amount, s.billingCycle),
-    0
-  );
-
-  // "Saved" reads as real money: the monthly-equivalent cost of everything
-  // the user has actually paused or cancelled, not a made-up figure.
-  const savedThisMonth = subscriptions
-    .filter((s) => s.status === "PAUSED" || s.status === "CANCELLED")
-    .reduce((sum, s) => sum + monthlyEquivalent(s.amount, s.billingCycle), 0);
-
-  const upcoming = activeSubscriptions
-    .slice()
+  const upcoming = subscriptions
+    .filter((s) => s.status === "ACTIVE" || s.status === "FLAGGED")
     .sort((a, b) => new Date(a.nextPaymentDate).getTime() - new Date(b.nextPaymentDate).getTime())
     .slice(0, 4);
 
@@ -62,7 +51,7 @@ export default function HomePage() {
         <View style={styles.badgeRow}>
           <View style={styles.badge}>
             <View style={[styles.dot, { backgroundColor: "#14ed9e" }]} />
-            <Text style={styles.badgeText}>{activeSubscriptions.length} active</Text>
+            <Text style={styles.badgeText}>{activeCount} active</Text>
           </View>
           <View style={styles.badge}>
             <View style={[styles.dot, { backgroundColor: "#ffd11a" }]} />

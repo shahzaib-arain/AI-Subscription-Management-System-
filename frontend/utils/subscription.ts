@@ -45,3 +45,25 @@ const CYCLE_TO_MONTHLY_FACTOR: Record<string, number> = {
 export function monthlyEquivalent(amount: number, cycle: string): number {
   return amount * (CYCLE_TO_MONTHLY_FACTOR[cycle] ?? 1);
 }
+
+export interface SpendSummary {
+  activeCount: number;
+  totalMonthly: number;
+  savedThisMonth: number;
+}
+
+/**
+ * The one place "how much am I spending / saving" gets computed — reused by
+ * the Home dashboard and the Profile screen so the two numbers can never
+ * quietly drift apart.
+ */
+export function computeSpendSummary(subscriptions: { status: string; amount: number; billingCycle: string }[]): SpendSummary {
+  const active = subscriptions.filter((s) => s.status === "ACTIVE" || s.status === "FLAGGED");
+  const inactive = subscriptions.filter((s) => s.status === "PAUSED" || s.status === "CANCELLED");
+
+  return {
+    activeCount: active.length,
+    totalMonthly: active.reduce((sum, s) => sum + monthlyEquivalent(s.amount, s.billingCycle), 0),
+    savedThisMonth: inactive.reduce((sum, s) => sum + monthlyEquivalent(s.amount, s.billingCycle), 0),
+  };
+}

@@ -22,19 +22,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final TransactionRepository transactionRepository;
     private final DetectionService detectionService;
+    private final BudgetCapService budgetCapService;
 
     @Override
     @Transactional
     public ApiResponse<List<SubscriptionResponse>> getUserSubscriptions(User user) {
         detectionService.ensureDataForUser(user);
 
-        List<SubscriptionResponse> subscriptions = subscriptionRepository
-                .findByUserIdOrderByNextPaymentDateAsc(user.getId())
-                .stream()
-                .map(this::toResponse)
-                .toList();
+        List<Subscription> subscriptions = subscriptionRepository.findByUserIdOrderByNextPaymentDateAsc(user.getId());
+        budgetCapService.checkAndFlag(user, subscriptions);
 
-        return ApiResponse.success("Subscriptions retrieved successfully.", subscriptions);
+        List<SubscriptionResponse> response = subscriptions.stream().map(this::toResponse).toList();
+        return ApiResponse.success("Subscriptions retrieved successfully.", response);
     }
 
     @Override

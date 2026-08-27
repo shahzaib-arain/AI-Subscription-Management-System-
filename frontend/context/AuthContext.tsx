@@ -3,6 +3,7 @@ import { Platform } from "react-native";
 import {
   authApi,
   walletApi,
+  userApi,
   SignUpParams,
   SignInParams,
   UserInfo,
@@ -11,6 +12,7 @@ import {
   WalletData,
   WalletTransactionData,
 } from "../services/api";
+import { registerForPushNotifications } from "../utils/push-notifications";
 
 interface AuthContextType {
   user: UserInfo | null;
@@ -99,6 +101,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  // Push registration is best-effort and must never block or fail a login —
+  // web, simulators, and denied permission all just quietly return null.
+  const registerPush = (activeToken: string) => {
+    registerForPushNotifications()
+      .then((pushToken) => (pushToken ? userApi.registerPushToken(activeToken, pushToken) : null))
+      .catch(() => {});
+  };
+
+  // The one place a token turns into a fully-loaded session — called from
+  // cold-start restore, login, and sign-up alike, so wallet loading and push
+  // registration only ever need to be wired up once.
+  const onAuthenticated = async (activeToken: string) => {
+    await loadWallet(activeToken);
+    registerPush(activeToken);
+  };
+
   // Load auth state from storage on startup
   useEffect(() => {
     const loadAuthState = async () => {
@@ -108,7 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (storedToken) {
           setToken(storedToken);
-          await loadWallet(storedToken);
+          await onAuthenticated(storedToken);
         }
         if (storedUser) {
           setUser(JSON.parse(storedUser));
@@ -136,7 +154,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await safeStorage.setItem("np_token", accessToken);
       await safeStorage.setItem("np_user", JSON.stringify(userData));
 
-      await loadWallet(accessToken);
+      await onAuthenticated(accessToken);
     } catch (e: any) {
       setError(e.message || "Failed to sign in. Please try again.");
       throw e;
@@ -158,7 +176,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await safeStorage.setItem("np_token", accessToken);
       await safeStorage.setItem("np_user", JSON.stringify(userData));
 
-      await loadWallet(accessToken);
+      await onAuthenticated(accessToken);
     } catch (e: any) {
       setError(e.message || "Failed to create account. Please check inputs.");
       throw e;

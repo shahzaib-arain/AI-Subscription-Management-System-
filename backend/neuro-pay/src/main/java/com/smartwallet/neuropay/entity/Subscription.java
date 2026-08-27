@@ -37,13 +37,13 @@ public class Subscription {
     private String currency;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(30)")
     private BillingCycle billingCycle;
 
     private LocalDate nextPaymentDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(30)")
     private SubscriptionStatus status;
 
     private String category;

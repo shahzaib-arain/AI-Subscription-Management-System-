@@ -214,6 +214,27 @@ export const alertApi = {
     authorizedRequest<AlertData>(`/alerts/${id}/read`, token, { method: "PATCH" }),
 };
 
+export interface UserSettingsData {
+  budgetCap: number | null;
+  pushNotificationsEnabled: boolean;
+}
+
+export const userApi = {
+  getSettings: (token: string) => authorizedRequest<UserSettingsData>("/users/me/settings", token),
+
+  updateBudgetCap: (token: string, budgetCap: number | null) =>
+    authorizedRequest<UserSettingsData>("/users/me/budget-cap", token, {
+      method: "PUT",
+      body: JSON.stringify({ budgetCap }),
+    }),
+
+  registerPushToken: (token: string, pushToken: string) =>
+    authorizedRequest<void>("/users/me/push-token", token, {
+      method: "POST",
+      body: JSON.stringify({ token: pushToken }),
+    }),
+};
+
 export const authApi = {
   signUp: (params: SignUpParams) => 
     request<AuthResponseData>("/auth/signup", {

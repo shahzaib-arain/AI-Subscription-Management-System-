@@ -2,7 +2,6 @@ package com.smartwallet.neuropay.service;
 
 import com.smartwallet.neuropay.entity.*;
 import com.smartwallet.neuropay.enums.*;
-import com.smartwallet.neuropay.repository.AlertRepository;
 import com.smartwallet.neuropay.repository.SubscriptionRepository;
 import com.smartwallet.neuropay.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +21,10 @@ import java.util.stream.Collectors;
 /**
  * Rule-based recurring-payment and anomaly detection — deliberately no ML
  * here. Scans a user's transaction history once, groups it by merchant, and
- * turns repeating charges into Subscription rows plus Alert rows for
- * anything that looks like a price hike, an unused subscription, or a
- * one-off charge from a merchant with no established pattern.
+ * turns repeating charges into Subscription rows plus Alert rows (created
+ * and delivered via AlertPublisherService) for anything that looks like a
+ * price hike, an unused subscription, or a one-off charge from a merchant
+ * with no established pattern.
  */
 @Service
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class DetectionService {
     private final TransactionRepository transactionRepository;
     private final TransactionSeederService transactionSeederService;
     private final SubscriptionRepository subscriptionRepository;
-    private final AlertRepository alertRepository;
+    private final AlertPublisherService alertPublisherService;
 
     /**
      * The one place data gets seeded and scanned — called lazily the first
@@ -101,7 +101,7 @@ public class DetectionService {
         }
 
         if (Duration.between(earliest.getTransactionDate(), now).toDays() <= NEW_PATTERN_WITHIN_DAYS) {
-            createAlert(user, subscription, AlertType.NEW_DETECTED, AlertSeverity.LOW,
+            alertPublisherService.publish(user, subscription, AlertType.NEW_DETECTED, AlertSeverity.LOW,
                     "New subscription detected",
                     String.format("AI detected a new recurring charge from %s ($%s/%s).",
                             merchant.getName(), latest.getAmount(), cycle.name().toLowerCase()));
@@ -109,7 +109,7 @@ public class DetectionService {
 
         long daysSinceLastCharge = Duration.between(latest.getTransactionDate(), now).toDays();
         if (!priceIncreased && daysSinceLastCharge > UNUSED_AFTER_DAYS) {
-            createAlert(user, subscription, AlertType.UNUSED, AlertSeverity.MEDIUM,
+            alertPublisherService.publish(user, subscription, AlertType.UNUSED, AlertSeverity.MEDIUM,
                     "Unused subscription",
                     String.format("You haven't been charged for %s in %d days. Consider pausing to save $%s/mo.",
                             merchant.getName(), daysSinceLastCharge, latest.getAmount()));
@@ -118,7 +118,7 @@ public class DetectionService {
 
     private void flagUnrecognizedOneOff(User user, Transaction transaction) {
         String merchantName = transaction.getMerchant() != null ? transaction.getMerchant().getName() : "Unknown";
-        createAlert(user, null, AlertType.FRAUD, AlertSeverity.HIGH,
+        alertPublisherService.publish(user, null, AlertType.FRAUD, AlertSeverity.HIGH,
                 "Suspicious charge detected",
                 String.format("An unrecognized merchant '%s' charged $%s — you don't have an existing subscription with this biller.",
                         merchantName, transaction.getAmount()));
@@ -129,23 +129,10 @@ public class DetectionService {
         BigDecimal percent = latestAmount.subtract(previousAmount)
                 .divide(previousAmount, 3, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal("100"));
-        createAlert(user, subscription, AlertType.PRICE_INCREASE, AlertSeverity.HIGH,
+        alertPublisherService.publish(user, subscription, AlertType.PRICE_INCREASE, AlertSeverity.HIGH,
                 "Price increase detected",
                 String.format("%s increased from $%s to $%s/mo — a %s%% hike.",
                         merchant.getName(), previousAmount, latestAmount, percent.setScale(0, RoundingMode.HALF_UP)));
-    }
-
-    private void createAlert(User user, Subscription subscription, AlertType type, AlertSeverity severity,
-                              String title, String description) {
-        alertRepository.save(Alert.builder()
-                .user(user)
-                .subscription(subscription)
-                .type(type)
-                .severity(severity)
-                .title(title)
-                .description(description)
-                .read(false)
-                .build());
     }
 
     private boolean isSignificantIncrease(BigDecimal previousAmount, BigDecimal latestAmount) {

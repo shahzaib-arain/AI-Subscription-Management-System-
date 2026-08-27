@@ -30,7 +30,7 @@ public class WalletTransaction {
     private Wallet wallet;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(30)")
     private WalletTransactionType type;
 
     @Column(nullable = false, precision = 19, scale = 2)

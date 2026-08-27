@@ -4,5 +4,6 @@ public enum AlertType {
     PRICE_INCREASE,
     FRAUD,
     UNUSED,
-    NEW_DETECTED
+    NEW_DETECTED,
+    BUDGET_EXCEEDED
 }

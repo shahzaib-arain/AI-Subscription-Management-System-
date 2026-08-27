@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -40,7 +41,7 @@ public class User implements UserDetails {
     private String virtualCardNumber; // Format: XXXX-XXXX-XXXX-XXXX
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(30)")
     private Role role;
 
     @Column(nullable = false)
@@ -48,6 +49,13 @@ public class User implements UserDetails {
 
     @Column(nullable = false)
     private boolean accountNonLocked;
+
+    /** Optional self-set monthly spend threshold; null means no cap configured. */
+    @Column(precision = 19, scale = 2)
+    private BigDecimal budgetCap;
+
+    /** Expo push token for this device; null until the app registers one. */
+    private String pushToken;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f6f9; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        .header { background: linear-gradient(135deg, #EF4444, #F97316); padding: 40px; text-align: center; }
+        .header h1 { color: #fff; margin: 0; font-size: 24px; }
+        .body { padding: 40px; }
+        .info { color: #555; font-size: 15px; line-height: 1.7; }
+        .description { background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 16px; border-radius: 4px; font-size: 15px; color: #92400E; margin: 20px 0; }
+        .footer { background: #f4f6f9; padding: 20px; text-align: center; color: #999; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚠️ <span th:text="${title}">Alert</span></h1>
+    </div>
+    <div class="body">
+        <p class="info">Hi <strong th:text="${name}">User</strong>,</p>
+        <p class="info">NeuroPay flagged something on your account that needs your attention:</p>
+        <div class="description" th:text="${description}">Alert description</div>
+        <p class="info">Open the app and check your Alerts tab to review or act on this.</p>
+    </div>
+    <div class="footer">© 2026 NeuroPay · Muhammad Ali Jinnah University</div>
+</div>
+</body>
+</html>

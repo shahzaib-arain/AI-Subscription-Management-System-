@@ -48,7 +48,7 @@ public class Transaction {
     private LocalDateTime transactionDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(30)")
     private TransactionSource source;
 
     private LocalDateTime createdAt;

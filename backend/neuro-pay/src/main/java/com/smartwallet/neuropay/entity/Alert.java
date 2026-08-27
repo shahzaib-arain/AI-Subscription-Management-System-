@@ -30,7 +30,7 @@ public class Alert {
     private Subscription subscription;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(30)")
     private AlertType type;
 
     @Column(nullable = false)
@@ -40,7 +40,7 @@ public class Alert {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(30)")
     private AlertSeverity severity;
 
     @Column(nullable = false)

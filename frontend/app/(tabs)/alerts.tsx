@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScrollView, View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { AlertTriangle, TrendingUp, Eye, Sparkles, ChevronRight } from "lucide-react-native";
+import { AlertTriangle, TrendingUp, Eye, Sparkles, Wallet, ChevronRight } from "lucide-react-native";
 import { useSubscriptions } from "../../context/SubscriptionsContext";
 import { AlertData } from "../../services/api";
 import { formatRelativeTime } from "../../utils/date";
@@ -12,6 +12,7 @@ const iconMap: Record<string, typeof TrendingUp> = {
   FRAUD: AlertTriangle,
   UNUSED: Eye,
   NEW_DETECTED: Sparkles,
+  BUDGET_EXCEEDED: Wallet,
 };
 
 const colorMap: Record<string, { bg: string; text: string }> = {
