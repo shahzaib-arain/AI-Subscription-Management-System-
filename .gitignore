@@ -3,6 +3,12 @@
 # dependencies
 node_modules/
 
+# Java/Maven
+**/target/
+
+# IDE files
+**/.idea/
+
 # Expo
 .expo/
 dist/
